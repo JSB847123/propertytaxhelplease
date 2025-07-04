@@ -116,7 +116,13 @@ const lawArticles: LawArticle[] = [
   // 부동산 과세자료분석
   { id: "ltl-123", title: "지방세법 제123조", article: "부동산 과세자료분석 전담기구의 설치 등", url: "https://www.law.go.kr/법령/지방세법/제123조", category: "부동산 과세자료분석" },
   { id: "ltle-119-2", title: "지방세법 시행령 제119조의2", article: "부동산 과세자료분석 전담기구의 조직·운영 및 자료통보 등", url: "https://www.law.go.kr/법령/지방세법 시행령/제119조의2", category: "부동산 과세자료분석" },
-  { id: "ltle-119-3", title: "지방세법 시행령 제119조의3", article: "종합부동산세 과세자료 관련 정보시스템", url: "https://www.law.go.kr/법령/지방세법 시행령/제119조의3", category: "부동산 과세자료분석" }
+  { id: "ltle-119-3", title: "지방세법 시행령 제119조의3", article: "종합부동산세 과세자료 관련 정보시스템", url: "https://www.law.go.kr/법령/지방세법 시행령/제119조의3", category: "부동산 과세자료분석" },
+
+  // 민법 관련
+  { id: "civil-779", title: "민법 제779조", article: "가족의 범위", url: "https://www.law.go.kr/법령/민법/제779조", category: "민법 관련" },
+  { id: "civil-1000", title: "민법 제1000조", article: "상속의 순위", url: "https://www.law.go.kr/법령/민법/제1000조", category: "민법 관련" },
+  { id: "civil-1001", title: "민법 제1001조", article: "대습상속", url: "https://www.law.go.kr/법령/민법/제1001조", category: "민법 관련" },
+  { id: "civil-1003", title: "민법 제1003조", article: "배우자의 상속순위", url: "https://www.law.go.kr/법령/민법/제1003조", category: "민법 관련" }
 ];
 
 export const LawArticleList = ({ onArticleClick }: LawArticleListProps) => {
