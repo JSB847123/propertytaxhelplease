@@ -17,12 +17,12 @@ interface LawArticleListProps {
 
 const lawArticles: LawArticle[] = [
   // 정의 관련
-  { id: "ltl-104", title: "지방세법 제104조", article: "정의", url: "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%A7%80%EB%B0%A9%EC%84%B8%EB%B2%95/%EC%A0%9C104%EC%A1%B0", category: "정의" },
+  { id: "ltl-104", title: "지방세법 제104조", article: "정의", url: "https://www.law.go.kr/법령/지방세법/제104조", category: "정의" },
 
   // 과세대상 관련
   { id: "ltl-105", title: "지방세법 제105조", article: "과세대상", url: "https://www.law.go.kr/법령/지방세법/제105조", category: "과세대상" },
-  { id: "ltl-106", title: "지방세법 제106조", article: "과세대상의 구분 등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "과세대상" },
-  { id: "ltl-106-2", title: "지방세법 제106조의2", article: "분리과세 대상 토지의 합리화 등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "과세대상" },
+  { id: "ltl-106", title: "지방세법 제106조", article: "과세대상의 구분 등", url: "https://www.law.go.kr/법령/지방세법/제106조", category: "과세대상" },
+  { id: "ltl-106-2", title: "지방세법 제106조의2", article: "분리과세 대상 토지의 합리화 등", url: "https://www.law.go.kr/법령/지방세법/제106조의2", category: "과세대상" },
   { id: "ltle-101", title: "지방세법 시행령 제101조", article: "별도합산과세 대상 토지의 범위", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "과세대상" },
   { id: "ltle-102", title: "지방세법 시행령 제102조", article: "분리과세대상 토지의 범위", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "과세대상" },
   { id: "ltle-103", title: "지방세법 시행령 제103조", article: "건축물의 범위 등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "과세대상" },
@@ -37,8 +37,8 @@ const lawArticles: LawArticle[] = [
   { id: "ltlr-57", title: "지방세법 시행규칙 제57조", article: "재산세 도시지역분 과세대상 토지의 범위", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243303#0000", category: "과세대상" },
 
   // 납세의무자 관련
-  { id: "ltl-107", title: "지방세법 제107조", article: "납세의무자", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "납세의무자" },
-  { id: "ltl-108", title: "지방세법 제108조", article: "납세지", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "납세의무자" },
+  { id: "ltl-107", title: "지방세법 제107조", article: "납세의무자", url: "https://www.law.go.kr/법령/지방세법/제107조", category: "납세의무자" },
+  { id: "ltl-108", title: "지방세법 제108조", article: "납세지", url: "https://www.law.go.kr/법령/지방세법/제108조", category: "납세의무자" },
   { id: "ltle-106", title: "지방세법 시행령 제106조", article: "납세의무자의 범위 등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "납세의무자" },
   { id: "ltle-107", title: "지방세법 시행령 제107조", article: "수익사업의 범위", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "납세의무자" },
   { id: "ltlr-53", title: "지방세법 시행규칙 제53조", article: "주된 상속자의 기준", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243303#0000", category: "납세의무자" },
@@ -46,7 +46,7 @@ const lawArticles: LawArticle[] = [
   { id: "ltlr-62", title: "지방세법 시행규칙 제62조", article: "재산세 납세의무자의 신고 등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243303#0000", category: "납세의무자" },
 
   // 비과세 관련
-  { id: "ltl-109", title: "지방세법 제109조", article: "비과세", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "비과세" },
+  { id: "ltl-109", title: "지방세법 제109조", article: "비과세", url: "https://www.law.go.kr/법령/지방세법/제109조", category: "비과세" },
   { id: "ltle-108", title: "지방세법 시행령 제108조", article: "비과세", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "비과세" },
 
   // 과세표준과 세율 관련
