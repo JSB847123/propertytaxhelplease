@@ -17,7 +17,7 @@ interface LawArticleListProps {
 
 const lawArticles: LawArticle[] = [
   // 정의 관련
-  { id: "ltl-104", title: "지방세법 제104조", article: "정의", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "정의" },
+  { id: "ltl-104", title: "지방세법 제104조", article: "정의", url: "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%A7%80%EB%B0%A9%EC%84%B8%EB%B2%95/%EC%A0%9C104%EC%A1%B0", category: "정의" },
 
   // 과세대상 관련
   { id: "ltl-105", title: "지방세법 제105조", article: "과세대상", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "과세대상" },
