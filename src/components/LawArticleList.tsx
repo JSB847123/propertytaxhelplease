@@ -73,50 +73,50 @@ const lawArticles: LawArticle[] = [
   { id: "ltlr-56", title: "지방세법 시행규칙 제56조", article: "공장의 범위와 적용기준", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243303#0000", category: "공장 관련" },
 
   // 부과·징수 일반
-  { id: "ltl-114", title: "지방세법 제114조", article: "과세기준일", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "부과·징수" },
-  { id: "ltl-115", title: "지방세법 제115조", article: "납기", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "부과·징수" },
-  { id: "ltl-116", title: "지방세법 제116조", article: "징수방법 등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "부과·징수" },
-  { id: "ltl-120", title: "지방세법 제120조", article: "신고의무", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "부과·징수" },
-  { id: "ltl-121", title: "지방세법 제121조", article: "재산세과세대장의 비치등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "부과·징수" },
-  { id: "ltle-117", title: "지방세법 시행령 제117조", article: "과세대장 등재 통지", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "부과·징수" },
+  { id: "ltl-114", title: "지방세법 제114조", article: "과세기준일", url: "https://www.law.go.kr/법령/지방세법/제114조", category: "부과·징수" },
+  { id: "ltl-115", title: "지방세법 제115조", article: "납기", url: "https://www.law.go.kr/법령/지방세법/제115조", category: "부과·징수" },
+  { id: "ltl-116", title: "지방세법 제116조", article: "징수방법 등", url: "https://www.law.go.kr/법령/지방세법/제116조", category: "부과·징수" },
+  { id: "ltl-120", title: "지방세법 제120조", article: "신고의무", url: "https://www.law.go.kr/법령/지방세법/제120조", category: "부과·징수" },
+  { id: "ltl-121", title: "지방세법 제121조", article: "재산세과세대장의 비치등", url: "https://www.law.go.kr/법령/지방세법/제121조", category: "부과·징수" },
+  { id: "ltle-117", title: "지방세법 시행령 제117조", article: "과세대장 등재 통지", url: "https://www.law.go.kr/법령/지방세법 시행령/제117조", category: "부과·징수" },
   { id: "ltlr-63", title: "지방세법 시행규칙 제63조", article: "과세대장 직권등재", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243303#0000", category: "부과·징수" },
   { id: "ltlr-64", title: "지방세법 시행규칙 제64조", article: "과세대장 비치", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243303#0000", category: "부과·징수" },
 
   // 물납 관련
-  { id: "ltl-117", title: "지방세법 제117조", article: "물납", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "물납 관련" },
-  { id: "ltle-113", title: "지방세법 시행령 제113조", article: "물납의 신청 및 허가", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "물납 관련" },
-  { id: "ltle-114", title: "지방세법 시행령 제114조", article: "관리·처분이 부적당한 부동산의 처리", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "물납 관련" },
-  { id: "ltle-115", title: "지방세법 시행령 제115조", article: "물납허가 부동산의 평가", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "물납 관련" },
+  { id: "ltl-117", title: "지방세법 제117조", article: "물납", url: "https://www.law.go.kr/법령/지방세법/제117조", category: "물납 관련" },
+  { id: "ltle-113", title: "지방세법 시행령 제113조", article: "물납의 신청 및 허가", url: "https://www.law.go.kr/법령/지방세법 시행령/제113조", category: "물납 관련" },
+  { id: "ltle-114", title: "지방세법 시행령 제114조", article: "관리·처분이 부적당한 부동산의 처리", url: "https://www.law.go.kr/법령/지방세법 시행령/제114조", category: "물납 관련" },
+  { id: "ltle-115", title: "지방세법 시행령 제115조", article: "물납허가 부동산의 평가", url: "https://www.law.go.kr/법령/지방세법 시행령/제115조", category: "물납 관련" },
   { id: "ltlr-59", title: "지방세법 시행규칙 제59조", article: "재산세의 물납 절차 등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243303#0000", category: "물납 관련" },
 
   // 분할납부·납부유예 관련
-  { id: "ltl-118", title: "지방세법 제118조", article: "분할납부", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "분할납부·납부유예" },
-  { id: "ltl-118-2", title: "지방세법 제118조의2", article: "납부유예", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "분할납부·납부유예" },
-  { id: "ltle-116", title: "지방세법 시행령 제116조", article: "분할납부세액의 기준 및 분할납부 신청", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "분할납부·납부유예" },
-  { id: "ltle-116-2", title: "지방세법 시행령 제116조의2", article: "주택 재산세의 납부유예", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "분할납부·납부유예" },
+  { id: "ltl-118", title: "지방세법 제118조", article: "분할납부", url: "https://www.law.go.kr/법령/지방세법/제118조", category: "분할납부·납부유예" },
+  { id: "ltl-118-2", title: "지방세법 제118조의2", article: "납부유예", url: "https://www.law.go.kr/법령/지방세법/제118조의2", category: "분할납부·납부유예" },
+  { id: "ltle-116", title: "지방세법 시행령 제116조", article: "분할납부세액의 기준 및 분할납부 신청", url: "https://www.law.go.kr/법령/지방세법 시행령/제116조", category: "분할납부·납부유예" },
+  { id: "ltle-116-2", title: "지방세법 시행령 제116조의2", article: "주택 재산세의 납부유예", url: "https://www.law.go.kr/법령/지방세법 시행령/제116조의2", category: "분할납부·납부유예" },
   { id: "ltlr-61-4", title: "지방세법 시행규칙 제61조의4", article: "주택 재산세액의 납부유예", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243303#0000", category: "분할납부·납부유예" },
 
   // 신탁재산 관련
-  { id: "ltl-119-2", title: "지방세법 제119조의2", article: "신탁재산 수탁자의 물적납세의무", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "신탁재산 관련" },
-  { id: "ltle-116-3", title: "지방세법 시행령 제116조의3", article: "신탁재산 수탁자의 물적납세의무", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "신탁재산 관련" },
+  { id: "ltl-119-2", title: "지방세법 제119조의2", article: "신탁재산 수탁자의 물적납세의무", url: "https://www.law.go.kr/법령/지방세법/제119조의2", category: "신탁재산 관련" },
+  { id: "ltle-116-3", title: "지방세법 시행령 제116조의3", article: "신탁재산 수탁자의 물적납세의무", url: "https://www.law.go.kr/법령/지방세법 시행령/제116조의3", category: "신탁재산 관련" },
   { id: "ltlr-61-2", title: "지방세법 시행규칙 제61조의2", article: "신탁재산 물적납세의무 납부통지서", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243303#0000", category: "신탁재산 관련" },
 
   // 종교단체·향교 관련
-  { id: "ltl-119-3", title: "지방세법 제119조의3", article: "향교 및 종교단체에 대한 특례", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "종교단체·향교 관련" },
-  { id: "ltle-116-4", title: "지방세법 시행령 제116조의4", article: "향교 및 종교단체에 대한 재산세 특례 대상 및 신청 등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "종교단체·향교 관련" },
+  { id: "ltl-119-3", title: "지방세법 제119조의3", article: "향교 및 종교단체에 대한 특례", url: "https://www.law.go.kr/법령/지방세법/제119조의3", category: "종교단체·향교 관련" },
+  { id: "ltle-116-4", title: "지방세법 시행령 제116조의4", article: "향교 및 종교단체에 대한 재산세 특례 대상 및 신청 등", url: "https://www.law.go.kr/법령/지방세법 시행령/제116조의4", category: "종교단체·향교 관련" },
   { id: "ltlr-61-3", title: "지방세법 시행규칙 제61조의3", article: "향교 및 종교단체에 대한 재산세 특례 신청", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243303#0000", category: "종교단체·향교 관련" },
 
   // 세 부담 상한
-  { id: "ltl-122", title: "지방세법 제122조", article: "세 부담의 상한", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "세 부담 상한" },
-  { id: "ltle-118", title: "지방세법 시행령 제118조", article: "세 부담 상한의 계산방법", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "세 부담 상한" },
+  { id: "ltl-122", title: "지방세법 제122조", article: "세 부담의 상한", url: "https://www.law.go.kr/법령/지방세법/제122조", category: "세 부담 상한" },
+  { id: "ltle-118", title: "지방세법 시행령 제118조", article: "세 부담 상한의 계산방법", url: "https://www.law.go.kr/법령/지방세법 시행령/제118조", category: "세 부담 상한" },
 
   // 소액 징수면제
-  { id: "ltl-119", title: "지방세법 제119조", article: "소액 징수면제", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "소액 징수면제" },
+  { id: "ltl-119", title: "지방세법 제119조", article: "소액 징수면제", url: "https://www.law.go.kr/법령/지방세법/제119조", category: "소액 징수면제" },
 
   // 부동산 과세자료분석
-  { id: "ltl-123", title: "지방세법 제123조", article: "부동산 과세자료분석 전담기구의 설치 등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "부동산 과세자료분석" },
-  { id: "ltle-119-2", title: "지방세법 시행령 제119조의2", article: "부동산 과세자료분석 전담기구의 조직·운영 및 자료통보 등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "부동산 과세자료분석" },
-  { id: "ltle-119-3", title: "지방세법 시행령 제119조의3", article: "종합부동산세 과세자료 관련 정보시스템", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "부동산 과세자료분석" }
+  { id: "ltl-123", title: "지방세법 제123조", article: "부동산 과세자료분석 전담기구의 설치 등", url: "https://www.law.go.kr/법령/지방세법/제123조", category: "부동산 과세자료분석" },
+  { id: "ltle-119-2", title: "지방세법 시행령 제119조의2", article: "부동산 과세자료분석 전담기구의 조직·운영 및 자료통보 등", url: "https://www.law.go.kr/법령/지방세법 시행령/제119조의2", category: "부동산 과세자료분석" },
+  { id: "ltle-119-3", title: "지방세법 시행령 제119조의3", article: "종합부동산세 과세자료 관련 정보시스템", url: "https://www.law.go.kr/법령/지방세법 시행령/제119조의3", category: "부동산 과세자료분석" }
 ];
 
 export const LawArticleList = ({ onArticleClick }: LawArticleListProps) => {
