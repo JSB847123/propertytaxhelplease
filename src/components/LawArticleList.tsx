@@ -20,7 +20,7 @@ const lawArticles: LawArticle[] = [
   { id: "ltl-104", title: "지방세법 제104조", article: "정의", url: "https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%A7%80%EB%B0%A9%EC%84%B8%EB%B2%95/%EC%A0%9C104%EC%A1%B0", category: "정의" },
 
   // 과세대상 관련
-  { id: "ltl-105", title: "지방세법 제105조", article: "과세대상", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "과세대상" },
+  { id: "ltl-105", title: "지방세법 제105조", article: "과세대상", url: "https://www.law.go.kr/법령/지방세법/제105조", category: "과세대상" },
   { id: "ltl-106", title: "지방세법 제106조", article: "과세대상의 구분 등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "과세대상" },
   { id: "ltl-106-2", title: "지방세법 제106조의2", article: "분리과세 대상 토지의 합리화 등", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243271#0000", category: "과세대상" },
   { id: "ltle-101", title: "지방세법 시행령 제101조", article: "별도합산과세 대상 토지의 범위", url: "https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=243302#0000", category: "과세대상" },
