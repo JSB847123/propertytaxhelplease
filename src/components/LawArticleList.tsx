@@ -1,7 +1,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Star } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface LawArticle {
   id: string;
@@ -126,6 +127,13 @@ const lawArticles: LawArticle[] = [
 ];
 
 export const LawArticleList = ({ onArticleClick }: LawArticleListProps) => {
+  const [favoriteArticles, setFavoriteArticles] = useState<string[]>([]);
+
+  useEffect(() => {
+    const favorites = JSON.parse(localStorage.getItem("favoriteArticles") || "[]");
+    setFavoriteArticles(favorites.map((article: LawArticle) => article.id));
+  }, []);
+
   const handleArticleClick = (article: LawArticle) => {
     // 최근 조회 목록에 추가
     const recentArticles = JSON.parse(localStorage.getItem("recentArticles") || "[]");
@@ -142,6 +150,22 @@ export const LawArticleList = ({ onArticleClick }: LawArticleListProps) => {
     onArticleClick(article.id);
   };
 
+  const toggleFavorite = (article: LawArticle, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const favorites = JSON.parse(localStorage.getItem("favoriteArticles") || "[]");
+    const isAlreadyFavorite = favorites.some((fav: LawArticle) => fav.id === article.id);
+    
+    let updatedFavorites;
+    if (isAlreadyFavorite) {
+      updatedFavorites = favorites.filter((fav: LawArticle) => fav.id !== article.id);
+    } else {
+      updatedFavorites = [article, ...favorites];
+    }
+    
+    localStorage.setItem("favoriteArticles", JSON.stringify(updatedFavorites));
+    setFavoriteArticles(updatedFavorites.map((fav: LawArticle) => fav.id));
+  };
+
   const categories = [...new Set(lawArticles.map(article => article.category))];
 
   return (
@@ -156,24 +180,39 @@ export const LawArticleList = ({ onArticleClick }: LawArticleListProps) => {
               <h3 className="font-semibold text-sm text-gray-700 border-b pb-1">
                 {category}
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="space-y-2">
                 {lawArticles
                   .filter(article => article.category === category)
                   .map(article => (
-                    <Button
-                      key={article.id}
-                      variant="outline"
-                      className="justify-start h-auto p-3 text-left"
-                      onClick={() => handleArticleClick(article)}
-                    >
-                      <div className="flex items-start gap-2 w-full">
-                        <div className="flex-1">
-                          <div className="font-medium text-sm">{article.title}</div>
-                          <div className="text-xs text-gray-600 mt-1">{article.article}</div>
+                    <div key={article.id} className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1 justify-start h-auto p-3 text-left"
+                        onClick={() => handleArticleClick(article)}
+                      >
+                        <div className="flex items-start gap-2 w-full">
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">{article.title}</div>
+                            <div className="text-xs text-gray-600 mt-1">{article.article}</div>
+                          </div>
+                          <ExternalLink className="h-3 w-3 mt-1 flex-shrink-0" />
                         </div>
-                        <ExternalLink className="h-3 w-3 mt-1 flex-shrink-0" />
-                      </div>
-                    </Button>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-2 h-auto"
+                        onClick={(e) => toggleFavorite(article, e)}
+                      >
+                        <Star 
+                          className={`h-4 w-4 ${
+                            favoriteArticles.includes(article.id) 
+                              ? 'fill-yellow-400 text-yellow-400' 
+                              : 'text-gray-400'
+                          }`} 
+                        />
+                      </Button>
+                    </div>
                   ))}
               </div>
             </div>

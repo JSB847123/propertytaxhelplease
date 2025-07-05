@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LawArticleList } from "@/components/LawArticleList";
 import { RecentArticles } from "@/components/RecentArticles";
+import { FavoriteArticles } from "@/components/FavoriteArticles";
 import { MemoSection } from "@/components/MemoSection";
 import { SearchSection } from "@/components/SearchSection";
 
@@ -28,8 +29,9 @@ const Index = () => {
             <LawArticleList onArticleClick={setSelectedArticle} />
           </div>
 
-          {/* Right Column - Recent Articles & Memo */}
+          {/* Right Column - Favorites, Recent Articles & Memo */}
           <div className="space-y-6">
+            <FavoriteArticles />
             <RecentArticles />
             <MemoSection />
           </div>
