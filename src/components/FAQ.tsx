@@ -46,7 +46,7 @@ const faqItems: FAQItem[] = [
   },
   {
     id: "property-tax-increase",
-    question: "전년도보다 재산세가 더 많이 나오는 이유가 무엇인가요?",
+    question: "주택분 재산세가 작년보다 더 많이 나온 이유가 무엇인가요?",
     answer: "답변을 준비 중입니다."
   }
 ];
