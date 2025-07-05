@@ -36,7 +36,7 @@ const faqItems: FAQItem[] = [
   },
   {
     id: "price-vs-tax",
-    question: "작년보다 공시가격이 내렸는데, 재산세는 왜 그대로이거나 오히려 올랐나요?",
+    question: "작년보다 주택공시가격이 내렸는데, 재산세는 왜 그대로이거나 올랐나요?",
     answer: "답변을 준비 중입니다."
   },
   {
