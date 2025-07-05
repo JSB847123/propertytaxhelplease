@@ -119,6 +119,22 @@ const lawArticles: LawArticle[] = [
   { id: "ltle-119-2", title: "지방세법 시행령 제119조의2", article: "부동산 과세자료분석 전담기구의 조직·운영 및 자료통보 등", url: "https://www.law.go.kr/법령/지방세법 시행령/제119조의2", category: "부동산 과세자료분석" },
   { id: "ltle-119-3", title: "지방세법 시행령 제119조의3", article: "종합부동산세 과세자료 관련 정보시스템", url: "https://www.law.go.kr/법령/지방세법 시행령/제119조의3", category: "부동산 과세자료분석" },
 
+  // 지역자원시설세 관련
+  { id: "ltl-141", title: "지방세법 제141조", article: "목적", url: "https://www.law.go.kr/법령/지방세법/제141조", category: "지역자원시설세" },
+  { id: "ltl-142", title: "지방세법 제142조", article: "과세대상", url: "https://www.law.go.kr/법령/지방세법/제142조", category: "지역자원시설세" },
+  { id: "ltl-143", title: "지방세법 제143조", article: "납세의무자", url: "https://www.law.go.kr/법령/지방세법/제143조", category: "지역자원시설세" },
+  { id: "ltl-144", title: "지방세법 제144조", article: "납세지", url: "https://www.law.go.kr/법령/지방세법/제144조", category: "지역자원시설세" },
+  { id: "ltl-145", title: "지방세법 제145조", article: "비과세", url: "https://www.law.go.kr/법령/지방세법/제145조", category: "지역자원시설세" },
+  { id: "ltl-146", title: "지방세법 제146조", article: "과세표준과 세율", url: "https://www.law.go.kr/법령/지방세법/제146조", category: "지역자원시설세" },
+  { id: "ltl-147", title: "지방세법 제147조", article: "부과·징수", url: "https://www.law.go.kr/법령/지방세법/제147조", category: "지역자원시설세" },
+  { id: "ltl-148", title: "지방세법 제148조", article: "소액 징수면제", url: "https://www.law.go.kr/법령/지방세법/제148조", category: "지역자원시설세" },
+  { id: "ltle-136", title: "지방세법 시행령 제136조", article: "과세대상", url: "https://www.law.go.kr/법령/지방세법 시행령/제136조", category: "지역자원시설세" },
+  { id: "ltle-137", title: "지방세법 시행령 제137조", article: "비과세", url: "https://www.law.go.kr/법령/지방세법 시행령/제137조", category: "지역자원시설세" },
+  { id: "ltle-138", title: "지방세법 시행령 제138조", article: "화재위험 건축물 등", url: "https://www.law.go.kr/법령/지방세법 시행령/제138조", category: "지역자원시설세" },
+  { id: "ltle-139", title: "지방세법 시행령 제139조", article: "납세고지", url: "https://www.law.go.kr/법령/지방세법 시행령/제139조", category: "지역자원시설세" },
+  { id: "ltlr-74", title: "지방세법 시행규칙 제74조", article: "건축물 시가표준액의 기준", url: "https://www.law.go.kr/법령/지방세법 시행규칙/제74조", category: "지역자원시설세" },
+  { id: "ltlr-75", title: "지방세법 시행규칙 제75조", article: "건축물 시가표준액의 기준", url: "https://www.law.go.kr/법령/지방세법 시행규칙/제75조", category: "지역자원시설세" },
+
   // 민법 관련
   { id: "civil-779", title: "민법 제779조", article: "가족의 범위", url: "https://www.law.go.kr/법령/민법/제779조", category: "민법 관련" },
   { id: "civil-1000", title: "민법 제1000조", article: "상속의 순위", url: "https://www.law.go.kr/법령/민법/제1000조", category: "민법 관련" },
