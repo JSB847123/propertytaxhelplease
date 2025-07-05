@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Star } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
+import { advancedSearch, findMatchedParts } from "@/lib/searchUtils";
 
 interface LawArticle {
   id: string;
@@ -162,12 +163,11 @@ export const LawArticleList = ({
   const filteredArticles = useMemo(() => {
     let filtered = lawArticles;
 
-    // 텍스트 검색
+    // 텍스트 검색 - 고급 검색 적용
     if (searchTerm) {
-      const lowerSearchTerm = searchTerm.toLowerCase();
       filtered = filtered.filter(article =>
-        article.title.toLowerCase().includes(lowerSearchTerm) ||
-        article.article.toLowerCase().includes(lowerSearchTerm)
+        advancedSearch(article.title, searchTerm) ||
+        advancedSearch(article.article, searchTerm)
       );
     }
 
@@ -188,22 +188,42 @@ export const LawArticleList = ({
     }
   }, [filteredArticles.length, onResultCountChange]);
 
-  // 검색어 강조 표시 함수
+  // 검색어 강조 표시 함수 - 고급 매치 지원
   const highlightText = (text: string, searchTerm: string) => {
     if (!searchTerm) return text;
     
-    const regex = new RegExp(`(${searchTerm})`, 'gi');
-    const parts = text.split(regex);
+    const matches = findMatchedParts(text, searchTerm);
+    if (matches.length === 0) return text;
     
-    return parts.map((part, index) =>
-      regex.test(part) ? (
-        <span key={index} className="bg-yellow-200 px-1 rounded font-semibold">
-          {part}
+    const result = [];
+    let lastIndex = 0;
+    
+    matches.forEach((match, index) => {
+      // 매치 이전 텍스트 추가
+      if (match.start > lastIndex) {
+        result.push(text.slice(lastIndex, match.start));
+      }
+      
+      // 매치된 텍스트 강조
+      const matchedText = text.slice(match.start, match.end);
+      const bgColor = match.type === 'direct' ? 'bg-yellow-200' : 
+                     match.type === 'synonym' ? 'bg-blue-200' : 'bg-green-200';
+      
+      result.push(
+        <span key={index} className={`${bgColor} px-1 rounded font-semibold`}>
+          {matchedText}
         </span>
-      ) : (
-        part
-      )
-    );
+      );
+      
+      lastIndex = match.end;
+    });
+    
+    // 마지막 남은 텍스트 추가
+    if (lastIndex < text.length) {
+      result.push(text.slice(lastIndex));
+    }
+    
+    return result;
   };
 
   const handleArticleClick = (article: LawArticle) => {

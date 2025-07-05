@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, X, Filter } from "lucide-react";
+import { advancedSearch, expandSynonyms } from "@/lib/searchUtils";
 
 interface SearchSectionProps {
   onSearch: (term: string, filters: string[]) => void;
@@ -55,12 +56,24 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     }
   }, [debouncedSearchTerm, activeFilters, onSearch]);
 
-  // 자동완성 제안
+  // 자동완성 제안 - 고급 검색 적용
   const suggestions = useMemo(() => {
     if (!searchTerm || searchTerm.length < 1) return [];
-    return LEGAL_TERMS.filter(term => 
-      term.toLowerCase().includes(searchTerm.toLowerCase())
-    ).slice(0, 5);
+    
+    // 직접 매치 + 유의어 매치 + 초성 매치
+    const matchedTerms = LEGAL_TERMS.filter(term => 
+      advancedSearch(term, searchTerm)
+    );
+    
+    // 검색어의 유의어도 제안에 포함
+    const synonyms = expandSynonyms(searchTerm.toLowerCase());
+    const synonymMatches = LEGAL_TERMS.filter(term =>
+      synonyms.some(synonym => term.toLowerCase().includes(synonym))
+    );
+    
+    // 중복 제거 후 상위 8개 반환
+    const allMatches = [...new Set([...matchedTerms, ...synonymMatches])];
+    return allMatches.slice(0, 8);
   }, [searchTerm]);
 
   const handleSearch = () => {
