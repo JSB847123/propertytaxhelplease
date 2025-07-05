@@ -94,6 +94,80 @@ All colors MUST be HSL.
   }
 }
 
+/* 인쇄 모드 스타일 */
+.print-mode {
+  background: white !important;
+  color: black !important;
+}
+
+.print-mode * {
+  background: white !important;
+  color: black !important;
+  box-shadow: none !important;
+  border-color: #ddd !important;
+}
+
+.print-mode .bg-muted,
+.print-mode .bg-card {
+  background: white !important;
+}
+
+/* 인쇄 전용 스타일 */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt !important;
+  }
+  
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+  
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+  
+  .border {
+    border: 1px solid #ddd !important;
+  }
+  
+  .bg-muted,
+  .bg-card,
+  .bg-background {
+    background: white !important;
+  }
+  
+  .text-muted-foreground {
+    color: #666 !important;
+  }
+  
+  .text-foreground {
+    color: black !important;
+  }
+}
+
+/* 반응형 폰트 크기 */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 12px;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
