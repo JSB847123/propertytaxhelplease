@@ -7,6 +7,7 @@ import { FavoriteArticles } from "@/components/FavoriteArticles";
 import { FrequentSites } from "@/components/FrequentSites";
 import { MemoSection } from "@/components/MemoSection";
 import { SearchSection } from "@/components/SearchSection";
+import { FAQ } from "@/components/FAQ";
 
 const Index = () => {
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
@@ -35,6 +36,7 @@ const Index = () => {
             <FavoriteArticles />
             <RecentArticles />
             <FrequentSites />
+            <FAQ />
             <MemoSection />
           </div>
         </div>
