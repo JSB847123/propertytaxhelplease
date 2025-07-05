@@ -29,7 +29,7 @@ const CATEGORIES = [
   "과세표준과 세율", "공장 관련", "부과·징수", "물납 관련",
   "분할납부·납부유예", "신탁재산 관련", "종교단체·향교 관련",
   "세 부담 상한", "소액 징수면제", "부동산 과세자료분석",
-  "지역자원시설세", "민법 관련"
+  "지역자원시설세", "지방교육세", "민법 관련"
 ];
 
 export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount }: SearchSectionProps) => {

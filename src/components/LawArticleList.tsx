@@ -177,6 +177,16 @@ const lawArticles: LawArticle[] = [
   { id: "ltlr-74", title: "지방세법 시행규칙 제74조", article: "건축물 시가표준액의 기준", url: "https://www.law.go.kr/법령/지방세법 시행규칙/제74조", category: "지역자원시설세" },
   { id: "ltlr-75", title: "지방세법 시행규칙 제75조", article: "건축물 시가표준액의 기준", url: "https://www.law.go.kr/법령/지방세법 시행규칙/제75조", category: "지역자원시설세" },
 
+  // 지방교육세 관련
+  { id: "ltl-149", title: "지방세법 제149조", article: "목적", url: "https://www.law.go.kr/법령/지방세법/제149조", category: "지방교육세" },
+  { id: "ltl-150", title: "지방세법 제150조", article: "납세의무자", url: "https://www.law.go.kr/법령/지방세법/제150조", category: "지방교육세" },
+  { id: "ltl-151", title: "지방세법 제151조", article: "과세표준과 세율", url: "https://www.law.go.kr/법령/지방세법/제151조", category: "지방교육세" },
+  { id: "ltl-152", title: "지방세법 제152조", article: "신고 및 납부와 부과·징수", url: "https://www.law.go.kr/법령/지방세법/제152조", category: "지방교육세" },
+  { id: "ltl-153", title: "지방세법 제153조", article: "부족세액의 추징 및 가산세", url: "https://www.law.go.kr/법령/지방세법/제153조", category: "지방교육세" },
+  { id: "ltl-154", title: "지방세법 제154조", article: "환급", url: "https://www.law.go.kr/법령/지방세법/제154조", category: "지방교육세" },
+  { id: "ltle-140", title: "지방세법 시행령 제140조", article: "납세고지", url: "https://www.law.go.kr/법령/지방세법 시행령/제140조", category: "지방교육세" },
+  { id: "ltle-141", title: "지방세법 시행령 제141조", article: "신고납부와 부과·징수", url: "https://www.law.go.kr/법령/지방세법 시행령/제141조", category: "지방교육세" },
+
   // 민법 관련
   { id: "civil-779", title: "민법 제779조", article: "가족의 범위", url: "https://www.law.go.kr/법령/민법/제779조", category: "민법 관련" },
   { id: "civil-1000", title: "민법 제1000조", article: "상속의 순위", url: "https://www.law.go.kr/법령/민법/제1000조", category: "민법 관련" },
