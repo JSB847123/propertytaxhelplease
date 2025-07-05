@@ -43,6 +43,11 @@ const faqItems: FAQItem[] = [
     id: "deceased-property-tax",
     question: "돌아가신 분 주택의 재산세는 누가 내야 하나요?",
     answer: "답변을 준비 중입니다."
+  },
+  {
+    id: "property-tax-increase",
+    question: "전년도보다 재산세가 더 많이 나오는 이유가 무엇인가요?",
+    answer: "답변을 준비 중입니다."
   }
 ];
 
