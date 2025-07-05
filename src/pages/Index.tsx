@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LawArticleList } from "@/components/LawArticleList";
 import { RecentArticles } from "@/components/RecentArticles";
@@ -11,6 +11,14 @@ import { FAQ } from "@/components/FAQ";
 
 const Index = () => {
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchFilters, setSearchFilters] = useState<string[]>([]);
+  const [searchResultCount, setSearchResultCount] = useState<number | undefined>(undefined);
+
+  const handleSearch = useCallback((term: string, filters: string[]) => {
+    setSearchTerm(term);
+    setSearchFilters(filters);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -27,8 +35,18 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Law Articles & Search */}
           <div className="lg:col-span-2 space-y-6">
-            <SearchSection />
-            <LawArticleList onArticleClick={setSelectedArticle} />
+            <SearchSection 
+              onSearch={handleSearch}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              resultCount={searchResultCount}
+            />
+            <LawArticleList 
+              onArticleClick={setSelectedArticle}
+              searchTerm={searchTerm}
+              searchFilters={searchFilters}
+              onResultCountChange={setSearchResultCount}
+            />
           </div>
 
           {/* Right Column - Favorites, Recent Articles, Sites & Memo */}

@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Star } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface LawArticle {
   id: string;
@@ -14,6 +14,9 @@ interface LawArticle {
 
 interface LawArticleListProps {
   onArticleClick: (articleId: string) => void;
+  searchTerm?: string;
+  searchFilters?: string[];
+  onResultCountChange?: (count: number) => void;
 }
 
 const lawArticles: LawArticle[] = [
@@ -142,13 +145,66 @@ const lawArticles: LawArticle[] = [
   { id: "civil-1003", title: "민법 제1003조", article: "배우자의 상속순위", url: "https://www.law.go.kr/법령/민법/제1003조", category: "민법 관련" }
 ];
 
-export const LawArticleList = ({ onArticleClick }: LawArticleListProps) => {
+export const LawArticleList = ({ 
+  onArticleClick, 
+  searchTerm = "", 
+  searchFilters = [], 
+  onResultCountChange 
+}: LawArticleListProps) => {
   const [favoriteArticles, setFavoriteArticles] = useState<string[]>([]);
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem("favoriteArticles") || "[]");
     setFavoriteArticles(favorites.map((article: LawArticle) => article.id));
   }, []);
+
+  // 검색 필터링
+  const filteredArticles = useMemo(() => {
+    let filtered = lawArticles;
+
+    // 텍스트 검색
+    if (searchTerm) {
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      filtered = filtered.filter(article =>
+        article.title.toLowerCase().includes(lowerSearchTerm) ||
+        article.article.toLowerCase().includes(lowerSearchTerm)
+      );
+    }
+
+    // 카테고리 필터
+    if (searchFilters.length > 0) {
+      filtered = filtered.filter(article =>
+        searchFilters.includes(article.category)
+      );
+    }
+
+    return filtered;
+  }, [searchTerm, searchFilters]);
+
+  // 검색 결과 수 업데이트
+  useEffect(() => {
+    if (onResultCountChange) {
+      onResultCountChange(filteredArticles.length);
+    }
+  }, [filteredArticles.length, onResultCountChange]);
+
+  // 검색어 강조 표시 함수
+  const highlightText = (text: string, searchTerm: string) => {
+    if (!searchTerm) return text;
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    const parts = text.split(regex);
+    
+    return parts.map((part, index) =>
+      regex.test(part) ? (
+        <span key={index} className="bg-yellow-200 px-1 rounded font-semibold">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
 
   const handleArticleClick = (article: LawArticle) => {
     // 최근 조회 목록에 추가
@@ -182,7 +238,7 @@ export const LawArticleList = ({ onArticleClick }: LawArticleListProps) => {
     setFavoriteArticles(updatedFavorites.map((fav: LawArticle) => fav.id));
   };
 
-  const categories = [...new Set(lawArticles.map(article => article.category))];
+  const categories = [...new Set(filteredArticles.map(article => article.category))];
 
   return (
     <Card>
@@ -190,16 +246,24 @@ export const LawArticleList = ({ onArticleClick }: LawArticleListProps) => {
         <CardTitle className="text-lg">재산세 관련 법령 조문</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {categories.map(category => (
-            <div key={category} className="space-y-2">
-              <h3 className="font-semibold text-sm text-gray-700 border-b pb-1">
-                {category}
-              </h3>
-              <div className="space-y-2">
-                {lawArticles
-                  .filter(article => article.category === category)
-                  .map(article => (
+        {filteredArticles.length === 0 && (searchTerm || searchFilters.length > 0) ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <p className="text-lg mb-2">검색 결과가 없습니다</p>
+            <p className="text-sm">다른 키워드나 필터를 시도해보세요</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {categories.map(category => {
+              const categoryArticles = filteredArticles.filter(article => article.category === category);
+              if (categoryArticles.length === 0) return null;
+              
+              return (
+                <div key={category} className="space-y-2">
+                  <h3 className="font-semibold text-sm text-gray-700 border-b pb-1">
+                    {category} ({categoryArticles.length})
+                  </h3>
+                  <div className="space-y-2">
+                    {categoryArticles.map(article => (
                     <div key={article.id} className="flex items-center gap-2">
                       <Button
                         variant="outline"
@@ -208,8 +272,12 @@ export const LawArticleList = ({ onArticleClick }: LawArticleListProps) => {
                       >
                         <div className="flex items-start gap-2 w-full">
                           <div className="flex-1">
-                            <div className="font-medium text-sm">{article.title}</div>
-                            <div className="text-xs text-gray-600 mt-1">{article.article}</div>
+                            <div className="font-medium text-sm">
+                              {highlightText(article.title, searchTerm)}
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1">
+                              {highlightText(article.article, searchTerm)}
+                            </div>
                           </div>
                           <ExternalLink className="h-3 w-3 mt-1 flex-shrink-0" />
                         </div>
@@ -229,11 +297,13 @@ export const LawArticleList = ({ onArticleClick }: LawArticleListProps) => {
                         />
                       </Button>
                     </div>
-                  ))}
-              </div>
-            </div>
-          ))}
-        </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
