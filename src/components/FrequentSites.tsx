@@ -15,6 +15,18 @@ const frequentSites: SiteLink[] = [
     title: "부동산공시가격 알리미",
     url: "https://www.realtyprice.kr/notice/main/mainBody.htm",
     description: "부동산 공시가격 조회"
+  },
+  {
+    id: "olta",
+    title: "한국지방세연구원",
+    url: "https://www.olta.re.kr/main.do",
+    description: "지방세 연구 및 정책 정보"
+  },
+  {
+    id: "taxnet",
+    title: "택스넷",
+    url: "https://www.taxnet.co.kr/",
+    description: "세무 관련 정보 포털"
   }
 ];
 
