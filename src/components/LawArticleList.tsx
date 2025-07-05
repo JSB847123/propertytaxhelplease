@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, Star } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { advancedSearch, findMatchedParts } from "@/lib/searchUtils";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface LawArticle {
   id: string;
@@ -11,6 +13,7 @@ interface LawArticle {
   article: string;
   url: string;
   category: string;
+  preview?: string;
 }
 
 interface LawArticleListProps {
@@ -22,11 +25,32 @@ interface LawArticleListProps {
 
 const lawArticles: LawArticle[] = [
   // 정의 관련
-  { id: "ltl-104", title: "지방세법 제104조", article: "정의", url: "https://www.law.go.kr/법령/지방세법/제104조", category: "정의" },
+  { 
+    id: "ltl-104", 
+    title: "지방세법 제104조", 
+    article: "정의", 
+    url: "https://www.law.go.kr/법령/지방세법/제104조", 
+    category: "정의",
+    preview: "재산세 관련 용어의 정의를 규정합니다. 토지, 건축물, 주택 등의 개념을 명확히 하여 과세 기준을 제시합니다."
+  },
 
   // 과세대상 관련
-  { id: "ltl-105", title: "지방세법 제105조", article: "과세대상", url: "https://www.law.go.kr/법령/지방세법/제105조", category: "과세대상" },
-  { id: "ltl-106", title: "지방세법 제106조", article: "과세대상의 구분 등", url: "https://www.law.go.kr/법령/지방세법/제106조", category: "과세대상" },
+  { 
+    id: "ltl-105", 
+    title: "지방세법 제105조", 
+    article: "과세대상", 
+    url: "https://www.law.go.kr/법령/지방세법/제105조", 
+    category: "과세대상",
+    preview: "재산세 과세대상인 토지와 건축물의 범위를 명시합니다. 소유자에게 부과되는 재산세의 기본 대상을 규정합니다."
+  },
+  { 
+    id: "ltl-106", 
+    title: "지방세법 제106조", 
+    article: "과세대상의 구분 등", 
+    url: "https://www.law.go.kr/법령/지방세법/제106조", 
+    category: "과세대상",
+    preview: "과세대상을 토지분과 건축물분으로 구분하고, 각각의 적용 기준과 계산 방법을 규정합니다."
+  },
   { id: "ltl-106-2", title: "지방세법 제106조의2", article: "분리과세 대상 토지 타당성 평가 등", url: "https://www.law.go.kr/법령/지방세법/제106조의2", category: "과세대상" },
   { id: "ltle-101", title: "지방세법 시행령 제101조", article: "별도합산과세 대상 토지의 범위", url: "https://www.law.go.kr/법령/지방세법 시행령/제101조", category: "과세대상" },
   { id: "ltle-102", title: "지방세법 시행령 제102조", article: "분리과세대상 토지의 범위", url: "https://www.law.go.kr/법령/지방세법 시행령/제102조", category: "과세대상" },
@@ -42,8 +66,22 @@ const lawArticles: LawArticle[] = [
   { id: "ltlr-57", title: "지방세법 시행규칙 제57조", article: "재산세 도시지역분 과세대상 토지의 범위", url: "https://www.law.go.kr/법령/지방세법 시행규칙/제57조", category: "과세대상" },
 
   // 납세의무자 관련
-  { id: "ltl-107", title: "지방세법 제107조", article: "납세의무자", url: "https://www.law.go.kr/법령/지방세법/제107조", category: "납세의무자" },
-  { id: "ltl-108", title: "지방세법 제108조", article: "납세지", url: "https://www.law.go.kr/법령/지방세법/제108조", category: "납세의무자" },
+  { 
+    id: "ltl-107", 
+    title: "지방세법 제107조", 
+    article: "납세의무자", 
+    url: "https://www.law.go.kr/법령/지방세법/제107조", 
+    category: "납세의무자",
+    preview: "재산세를 납부할 의무가 있는 자를 규정합니다. 과세기준일 현재 소유자가 납세의무자가 되며, 특수한 경우의 납세의무도 포함합니다."
+  },
+  { 
+    id: "ltl-108", 
+    title: "지방세법 제108조", 
+    article: "납세지", 
+    url: "https://www.law.go.kr/법령/지방세법/제108조", 
+    category: "납세의무자",
+    preview: "재산세를 납부해야 할 지역(납세지)을 정합니다. 일반적으로 부동산 소재지가 납세지가 됩니다."
+  },
   { id: "ltle-106", title: "지방세법 시행령 제106조", article: "납세의무자의 범위 등", url: "https://www.law.go.kr/법령/지방세법 시행령/제106조", category: "납세의무자" },
   { id: "ltle-107", title: "지방세법 시행령 제107조", article: "수익사업의 범위", url: "https://www.law.go.kr/법령/지방세법 시행령/제107조", category: "납세의무자" },
   { id: "ltlr-53", title: "지방세법 시행규칙 제53조", article: "주된 상속자의 기준", url: "https://www.law.go.kr/법령/지방세법 시행규칙/제53조", category: "납세의무자" },
@@ -272,57 +310,73 @@ export const LawArticleList = ({
             <p className="text-sm">다른 키워드나 필터를 시도해보세요</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {categories.map(category => {
-              const categoryArticles = filteredArticles.filter(article => article.category === category);
-              if (categoryArticles.length === 0) return null;
-              
-              return (
-                <div key={category} className="space-y-2">
-                  <h3 className="font-semibold text-sm text-gray-700 border-b pb-1">
-                    {category} ({categoryArticles.length})
-                  </h3>
-                  <div className="space-y-2">
-                    {categoryArticles.map(article => (
-                    <div key={article.id} className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        className="flex-1 justify-start h-auto p-3 text-left"
-                        onClick={() => handleArticleClick(article)}
-                      >
-                        <div className="flex items-start gap-2 w-full">
-                          <div className="flex-1">
-                            <div className="font-medium text-sm">
-                              {highlightText(article.title, searchTerm)}
-                            </div>
-                            <div className="text-xs text-gray-600 mt-1">
-                              {highlightText(article.article, searchTerm)}
-                            </div>
+          <TooltipProvider>
+            <Accordion type="multiple" className="w-full">
+              {categories.map(category => {
+                const categoryArticles = filteredArticles.filter(article => article.category === category);
+                if (categoryArticles.length === 0) return null;
+                
+                return (
+                  <AccordionItem key={category} value={category}>
+                    <AccordionTrigger className="text-left">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-sm">{category}</span>
+                        <span className="text-xs text-muted-foreground">({categoryArticles.length})</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-2 pt-2">
+                        {categoryArticles.map(article => (
+                          <div key={article.id} className="flex items-center gap-2">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="flex-1 justify-start h-auto p-3 text-left"
+                                  onClick={() => handleArticleClick(article)}
+                                >
+                                  <div className="flex items-start gap-2 w-full">
+                                    <div className="flex-1">
+                                      <div className="font-medium text-sm">
+                                        {highlightText(article.title, searchTerm)}
+                                      </div>
+                                      <div className="text-xs text-gray-600 mt-1">
+                                        {highlightText(article.article, searchTerm)}
+                                      </div>
+                                    </div>
+                                    <ExternalLink className="h-3 w-3 mt-1 flex-shrink-0" />
+                                  </div>
+                                </Button>
+                              </TooltipTrigger>
+                              {article.preview && (
+                                <TooltipContent className="max-w-xs">
+                                  <p className="text-sm">{article.preview}</p>
+                                </TooltipContent>
+                              )}
+                            </Tooltip>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="p-2 h-auto"
+                              onClick={(e) => toggleFavorite(article, e)}
+                            >
+                              <Star 
+                                className={`h-4 w-4 ${
+                                  favoriteArticles.includes(article.id) 
+                                    ? 'fill-yellow-400 text-yellow-400' 
+                                    : 'text-gray-400'
+                                }`} 
+                              />
+                            </Button>
                           </div>
-                          <ExternalLink className="h-3 w-3 mt-1 flex-shrink-0" />
-                        </div>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="p-2 h-auto"
-                        onClick={(e) => toggleFavorite(article, e)}
-                      >
-                        <Star 
-                          className={`h-4 w-4 ${
-                            favoriteArticles.includes(article.id) 
-                              ? 'fill-yellow-400 text-yellow-400' 
-                              : 'text-gray-400'
-                          }`} 
-                        />
-                      </Button>
-                    </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
+          </TooltipProvider>
         )}
       </CardContent>
     </Card>
