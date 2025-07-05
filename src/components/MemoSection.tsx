@@ -126,7 +126,7 @@ export const MemoSection = () => {
       </CardHeader>
       <CardContent className="space-y-3">
         <Textarea
-          placeholder="민원 응대 내용을 메모하세요..."
+          placeholder="메모란입니다."
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
           className="min-h-[200px] resize-none"
