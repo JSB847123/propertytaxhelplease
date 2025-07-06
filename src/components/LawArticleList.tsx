@@ -337,7 +337,7 @@ export const LawArticleList = ({
       keywords.push(article.category);
     }
 
-    return [...new Set(keywords)].slice(0, 3); // 중복 제거 및 최대 3개
+    return [...new Set(keywords)].slice(0, 5); // 중복 제거 및 최대 5개
   };
 
   const categories = [...new Set(filteredArticles.map(article => article.category))];
