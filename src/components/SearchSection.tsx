@@ -143,6 +143,10 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
                     }}
                     onKeyPress={handleKeyPress}
                     onFocus={() => setShowSuggestions(searchTerm.length >= 1)}
+                    onClick={(e) => {
+                      e.currentTarget.focus();
+                      setShowSuggestions(searchTerm.length >= 1);
+                    }}
                     autoFocus
                   />
                 </div>
