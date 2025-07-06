@@ -237,12 +237,21 @@ export const LawArticleList = ({
   const filteredArticles = useMemo(() => {
     let filtered = lawArticles;
 
-    // 텍스트 검색 - 고급 검색 적용
+    // 텍스트 검색 - 고급 검색 적용 (조문명, 조문내용, 키워드/태그 검색)
     if (searchTerm) {
-      filtered = filtered.filter(article =>
-        advancedSearch(article.title, searchTerm) ||
-        advancedSearch(article.article, searchTerm)
-      );
+      filtered = filtered.filter(article => {
+        // 조문명과 조문내용 검색
+        const titleMatch = advancedSearch(article.title, searchTerm);
+        const articleMatch = advancedSearch(article.article, searchTerm);
+        
+        // 키워드/태그 검색
+        const keywords = extractKeywords(article);
+        const keywordMatch = keywords.some(keyword => 
+          advancedSearch(keyword, searchTerm)
+        );
+        
+        return titleMatch || articleMatch || keywordMatch;
+      });
     }
 
     // 카테고리 필터
