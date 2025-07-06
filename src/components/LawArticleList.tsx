@@ -223,6 +223,7 @@ export const LawArticleList = ({
   const [customTags, setCustomTags] = useState<{ [key: string]: string[] }>({});
   const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
   const [editTagsInput, setEditTagsInput] = useState<string>("");
+  const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem("favoriteArticles") || "[]");
@@ -256,13 +257,23 @@ export const LawArticleList = ({
 
     // 카테고리 필터
     if (searchFilters.length > 0) {
-      filtered = filtered.filter(article =>
+      filtered = filtered.filter(article => 
         searchFilters.includes(article.category)
       );
     }
 
+    // 태그 필터
+    if (activeTagFilter) {
+      filtered = filtered.filter(article => {
+        const keywords = extractKeywords(article);
+        return keywords.some(keyword => 
+          keyword.toLowerCase().includes(activeTagFilter.toLowerCase())
+        );
+      });
+    }
+
     return filtered;
-  }, [searchTerm, searchFilters]);
+  }, [searchTerm, searchFilters, activeTagFilter]);
 
   // 검색 결과 수 업데이트
   useEffect(() => {
@@ -497,12 +508,39 @@ export const LawArticleList = ({
     setEditTagsInput("");
   };
 
+  // 태그 클릭 핸들러
+  const handleTagClick = (tag: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (activeTagFilter === tag) {
+      setActiveTagFilter(null); // 같은 태그 클릭시 필터 해제
+    } else {
+      setActiveTagFilter(tag); // 새로운 태그로 필터링
+    }
+  };
+
   const categories = [...new Set(filteredArticles.map(article => article.category))];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">재산세 관련 법령 조문</CardTitle>
+        <CardTitle className="text-lg flex items-center justify-between">
+          재산세 관련 법령 조문
+          {activeTagFilter && (
+            <div className="flex items-center gap-2">
+              <Badge variant="default" className="text-sm">
+                태그: {activeTagFilter}
+              </Badge>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-auto p-1 text-xs"
+                onClick={() => setActiveTagFilter(null)}
+              >
+                필터 해제
+              </Button>
+            </div>
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {filteredArticles.length === 0 && (searchTerm || searchFilters.length > 0) ? (
@@ -551,16 +589,21 @@ export const LawArticleList = ({
                                               {article.preview}
                                             </p>
                                           )}
-                                           <div className="flex flex-wrap gap-1 items-center">
-                                             {keywords.map((keyword, index) => (
-                                               <Badge 
-                                                 key={index} 
-                                                 variant="secondary" 
-                                                 className="text-xs px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                                               >
-                                                 {keyword}
-                                               </Badge>
-                                             ))}
+                                            <div className="flex flex-wrap gap-1 items-center">
+                                              {keywords.map((keyword, index) => (
+                                                <Badge 
+                                                  key={index} 
+                                                  variant={activeTagFilter === keyword ? "default" : "secondary"}
+                                                  className={`text-xs px-2 py-1 cursor-pointer transition-colors ${
+                                                    activeTagFilter === keyword 
+                                                      ? "bg-primary text-primary-foreground" 
+                                                      : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                                                  }`}
+                                                  onClick={(e) => handleTagClick(keyword, e)}
+                                                >
+                                                  {keyword}
+                                                </Badge>
+                                              ))}
                                              <Dialog open={editingArticleId === article.id} onOpenChange={(open) => !open && cancelEditTags()}>
                                                <DialogTrigger asChild>
                                                  <Button
