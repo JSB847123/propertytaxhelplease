@@ -2,11 +2,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Star } from "lucide-react";
+import { ExternalLink, Star, Edit } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { advancedSearch, findMatchedParts } from "@/lib/searchUtils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface LawArticle {
   id: string;
@@ -202,10 +205,17 @@ export const LawArticleList = ({
   onResultCountChange 
 }: LawArticleListProps) => {
   const [favoriteArticles, setFavoriteArticles] = useState<string[]>([]);
+  const [customTags, setCustomTags] = useState<{ [key: string]: string[] }>({});
+  const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
+  const [editTagsInput, setEditTagsInput] = useState<string>("");
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem("favoriteArticles") || "[]");
     setFavoriteArticles(favorites.map((article: LawArticle) => article.id));
+    
+    // 커스텀 태그 로드
+    const savedCustomTags = JSON.parse(localStorage.getItem("customTags") || "{}");
+    setCustomTags(savedCustomTags);
   }, []);
 
   // 검색 필터링
@@ -307,8 +317,13 @@ export const LawArticleList = ({
     setFavoriteArticles(updatedFavorites.map((fav: LawArticle) => fav.id));
   };
 
-  // 키워드 추출 함수
+  // 키워드 추출 함수 (기본 키워드 + 커스텀 키워드)
   const extractKeywords = (article: LawArticle): string[] => {
+    // 커스텀 태그가 있으면 우선 사용
+    if (customTags[article.id]) {
+      return customTags[article.id].slice(0, 5);
+    }
+
     const keywords: string[] = [];
     
     // 주요 키워드 매핑
@@ -338,6 +353,42 @@ export const LawArticleList = ({
     }
 
     return [...new Set(keywords)].slice(0, 5); // 중복 제거 및 최대 5개
+  };
+
+  // 태그 편집 시작
+  const startEditTags = (article: LawArticle, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingArticleId(article.id);
+    const currentTags = customTags[article.id] || extractKeywords(article);
+    setEditTagsInput(currentTags.join(', '));
+  };
+
+  // 태그 편집 저장
+  const saveTags = () => {
+    if (!editingArticleId) return;
+    
+    const newTags = editTagsInput
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0)
+      .slice(0, 5);
+
+    const updatedCustomTags = {
+      ...customTags,
+      [editingArticleId]: newTags
+    };
+
+    setCustomTags(updatedCustomTags);
+    localStorage.setItem("customTags", JSON.stringify(updatedCustomTags));
+    
+    setEditingArticleId(null);
+    setEditTagsInput("");
+  };
+
+  // 태그 편집 취소
+  const cancelEditTags = () => {
+    setEditingArticleId(null);
+    setEditTagsInput("");
   };
 
   const categories = [...new Set(filteredArticles.map(article => article.category))];
@@ -394,17 +445,56 @@ export const LawArticleList = ({
                                               {article.preview}
                                             </p>
                                           )}
-                                          <div className="flex flex-wrap gap-1">
-                                            {keywords.map((keyword, index) => (
-                                              <Badge 
-                                                key={index} 
-                                                variant="secondary" 
-                                                className="text-xs px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                                              >
-                                                {keyword}
-                                              </Badge>
-                                            ))}
-                                          </div>
+                                           <div className="flex flex-wrap gap-1 items-center">
+                                             {keywords.map((keyword, index) => (
+                                               <Badge 
+                                                 key={index} 
+                                                 variant="secondary" 
+                                                 className="text-xs px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                                               >
+                                                 {keyword}
+                                               </Badge>
+                                             ))}
+                                             <Dialog open={editingArticleId === article.id} onOpenChange={(open) => !open && cancelEditTags()}>
+                                               <DialogTrigger asChild>
+                                                 <Button
+                                                   variant="ghost"
+                                                   size="sm"
+                                                   className="p-1 h-6 w-6 opacity-50 hover:opacity-100"
+                                                   onClick={(e) => startEditTags(article, e)}
+                                                 >
+                                                   <Edit className="h-3 w-3" />
+                                                 </Button>
+                                               </DialogTrigger>
+                                               <DialogContent className="sm:max-w-md">
+                                                 <DialogHeader>
+                                                   <DialogTitle className="text-sm">태그 편집</DialogTitle>
+                                                 </DialogHeader>
+                                                 <div className="space-y-4">
+                                                   <div>
+                                                     <Label htmlFor="tags" className="text-sm">
+                                                       태그 (쉼표로 구분, 최대 5개)
+                                                     </Label>
+                                                     <Input
+                                                       id="tags"
+                                                       value={editTagsInput}
+                                                       onChange={(e) => setEditTagsInput(e.target.value)}
+                                                       placeholder="시가표준액, 결정기준, 토지..."
+                                                       className="mt-1"
+                                                     />
+                                                   </div>
+                                                   <div className="flex justify-end gap-2">
+                                                     <Button variant="outline" size="sm" onClick={cancelEditTags}>
+                                                       취소
+                                                     </Button>
+                                                     <Button size="sm" onClick={saveTags}>
+                                                       저장
+                                                     </Button>
+                                                   </div>
+                                                 </div>
+                                               </DialogContent>
+                                             </Dialog>
+                                           </div>
                                         </div>
                                         <Button
                                           variant="ghost"
