@@ -171,6 +171,14 @@ const lawArticles: LawArticle[] = [
   { id: "ltsl-31", title: "지방세특례제한법 제31조", article: "공공임대주택 등에 대한 감면", url: "https://law.go.kr/법령/지방세특례제한법/제31조", category: "지방세특례제한법" },
   { id: "ltsl-31-3", title: "지방세특례제한법 제31조의3", article: "장기일반민간임대주택 등에 대한 감면", url: "https://law.go.kr/법령/지방세특례제한법/제31조의3", category: "지방세특례제한법" },
   { id: "ltsl-35", title: "지방세특례제한법 제35조", article: "주택담보노후연금보증 대상 주택에 대한 감면", url: "https://law.go.kr/법령/지방세특례제한법/제35조", category: "지방세특례제한법" },
+  { id: "ltsl-36-4", title: "지방세특례제한법 제36조의4", article: "전세사기피해자 지원을 위한 감면", url: "https://law.go.kr/법령/지방세특례제한법/제36조의4", category: "지방세특례제한법" },
+
+  // 지방세특례제한법시행령
+  { id: "ltslr-8-3", title: "지방세특례제한법시행령 제8조의3", article: "영유아어린이집 등에 사용하는 부동산의 범위 등", url: "https://law.go.kr/법령/지방세특례제한법시행령/제8조의3", category: "지방세특례제한법시행령" },
+  { id: "ltslr-8-4", title: "지방세특례제한법시행령 제8조의4", article: "무료 노인복지시설의 범위", url: "https://law.go.kr/법령/지방세특례제한법시행령/제8조의4", category: "지방세특례제한법시행령" },
+  { id: "ltslr-13-2", title: "지방세특례제한법시행령 제13조의2", article: "다가구주택의 범위", url: "https://law.go.kr/법령/지방세특례제한법시행령/제13조의2", category: "지방세특례제한법시행령" },
+  { id: "ltslr-13-3", title: "지방세특례제한법시행령 제13조의3", article: "공공주택사업자의 임대가 목적인 주택 및 건축물의 범위", url: "https://law.go.kr/법령/지방세특례제한법시행령/제13조의3", category: "지방세특례제한법시행령" },
+  { id: "ltslr-16", title: "지방세특례제한법시행령 제16조", article: "주택담보노후연금보증 대상 주택의 1가구 1주택 범위", url: "https://law.go.kr/법령/지방세특례제한법시행령/제16조", category: "지방세특례제한법시행령" },
 
   // 지역자원시설세 관련
   { id: "ltl-141", title: "지방세법 제141조", article: "목적", url: "https://www.law.go.kr/법령/지방세법/제141조", category: "지역자원시설세" },
