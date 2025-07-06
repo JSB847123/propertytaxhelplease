@@ -7,6 +7,7 @@ import { FavoriteArticles } from "@/components/FavoriteArticles";
 import { FrequentSites } from "@/components/FrequentSites";
 import { MemoSection } from "@/components/MemoSection";
 import { SearchSection } from "@/components/SearchSection";
+import { BasicLawLinks } from "@/components/BasicLawLinks";
 import { FAQ } from "@/components/FAQ";
 import { UtilityBar } from "@/components/UtilityBar";
 
@@ -39,7 +40,8 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Law Articles & Search */}
           <div className="lg:col-span-2 space-y-6">
-            <SearchSection 
+            <BasicLawLinks />
+            <SearchSection
               onSearch={handleSearch}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
