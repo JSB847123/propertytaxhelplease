@@ -321,7 +321,7 @@ export const LawArticleList = ({
   const extractKeywords = (article: LawArticle): string[] => {
     // 커스텀 태그가 있으면 우선 사용
     if (customTags[article.id]) {
-      return customTags[article.id].slice(0, 5);
+      return customTags[article.id].slice(0, 7);
     }
 
     // 사용자 제공 키워드 매핑
@@ -453,7 +453,7 @@ export const LawArticleList = ({
       .split(',')
       .map(tag => tag.trim())
       .filter(tag => tag.length > 0)
-      .slice(0, 5);
+      .slice(0, 7);
 
     const updatedCustomTags = {
       ...customTags,
@@ -554,9 +554,9 @@ export const LawArticleList = ({
                                                  </DialogHeader>
                                                  <div className="space-y-4">
                                                    <div>
-                                                     <Label htmlFor="tags" className="text-sm">
-                                                       태그 (쉼표로 구분, 최대 5개)
-                                                     </Label>
+                                                      <Label htmlFor="tags" className="text-sm">
+                                                        태그 (쉼표로 구분, 최대 7개)
+                                                      </Label>
                                                      <Input
                                                        id="tags"
                                                        value={editTagsInput}
