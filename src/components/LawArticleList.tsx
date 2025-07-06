@@ -342,7 +342,7 @@ export const LawArticleList = ({
   };
 
   // 키워드 추출 함수 (기본 키워드 + 커스텀 키워드)
-  const extractKeywords = (article: LawArticle): string[] => {
+  function extractKeywords(article: LawArticle): string[] {
     // 커스텀 태그가 있으면 우선 사용
     if (customTags[article.id]) {
       return customTags[article.id].slice(0, 7);
