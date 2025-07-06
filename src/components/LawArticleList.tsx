@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Star } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { advancedSearch, findMatchedParts } from "@/lib/searchUtils";
@@ -306,6 +307,39 @@ export const LawArticleList = ({
     setFavoriteArticles(updatedFavorites.map((fav: LawArticle) => fav.id));
   };
 
+  // 키워드 추출 함수
+  const extractKeywords = (article: LawArticle): string[] => {
+    const keywords: string[] = [];
+    
+    // 주요 키워드 매핑
+    const keywordMap: { [key: string]: string[] } = {
+      "과세표준": ["시가표준액", "결정기준"],
+      "과세대상": ["토지", "건축물"],
+      "납세의무자": ["소유자", "과세기준일"],
+      "세율": ["세율구간", "특례세율"],
+      "1세대 1주택": ["특례세율", "감면"],
+      "도시지역분": ["도시계획", "추가세"],
+      "분할납부": ["납부유예", "분할"],
+      "물납": ["현물납부", "부동산"],
+      "비과세": ["면제", "감면"],
+      "정의": ["용어", "개념"]
+    };
+
+    // article 내용에서 키워드 추출
+    for (const [key, values] of Object.entries(keywordMap)) {
+      if (article.article.includes(key) || article.title.includes(key)) {
+        keywords.push(...values);
+      }
+    }
+
+    // 카테고리도 키워드로 추가
+    if (keywords.length === 0) {
+      keywords.push(article.category);
+    }
+
+    return [...new Set(keywords)].slice(0, 3); // 중복 제거 및 최대 3개
+  };
+
   const categories = [...new Set(filteredArticles.map(article => article.category))];
 
   return (
@@ -336,50 +370,69 @@ export const LawArticleList = ({
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-2 pt-2">
-                        {categoryArticles.map(article => (
-                          <div key={article.id} className="flex items-center gap-2">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  className="flex-1 justify-start h-auto p-3 text-left"
-                                  onClick={() => handleArticleClick(article)}
-                                >
-                                  <div className="flex items-start gap-2 w-full">
-                                    <div className="flex-1">
-                                      <div className="font-medium text-sm">
-                                        {highlightText(article.title, searchTerm)}
+                        {categoryArticles.map(article => {
+                          const keywords = extractKeywords(article);
+                          return (
+                            <div key={article.id} className="relative">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Card 
+                                    className="cursor-pointer hover:shadow-md transition-shadow"
+                                    onClick={() => handleArticleClick(article)}
+                                  >
+                                    <CardContent className="p-4">
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1">
+                                          <div className="flex items-center gap-2 mb-2">
+                                            <h4 className="font-semibold text-sm text-primary">
+                                              {highlightText(article.title, searchTerm)} - {highlightText(article.article, searchTerm)}
+                                            </h4>
+                                            <ExternalLink className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+                                          </div>
+                                          {article.preview && (
+                                            <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                                              {article.preview}
+                                            </p>
+                                          )}
+                                          <div className="flex flex-wrap gap-1">
+                                            {keywords.map((keyword, index) => (
+                                              <Badge 
+                                                key={index} 
+                                                variant="secondary" 
+                                                className="text-xs px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                                              >
+                                                {keyword}
+                                              </Badge>
+                                            ))}
+                                          </div>
+                                        </div>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="p-1 h-auto absolute top-2 right-2"
+                                          onClick={(e) => toggleFavorite(article, e)}
+                                        >
+                                          <Star 
+                                            className={`h-4 w-4 ${
+                                              favoriteArticles.includes(article.id) 
+                                                ? 'fill-yellow-400 text-yellow-400' 
+                                                : 'text-gray-400'
+                                            }`} 
+                                          />
+                                        </Button>
                                       </div>
-                                      <div className="text-xs text-gray-600 mt-1">
-                                        {highlightText(article.article, searchTerm)}
-                                      </div>
-                                    </div>
-                                    <ExternalLink className="h-3 w-3 mt-1 flex-shrink-0" />
-                                  </div>
-                                </Button>
-                              </TooltipTrigger>
-                              {article.preview && (
-                                <TooltipContent className="max-w-xs">
-                                  <p className="text-sm">{article.preview}</p>
-                                </TooltipContent>
-                              )}
-                            </Tooltip>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-2 h-auto"
-                              onClick={(e) => toggleFavorite(article, e)}
-                            >
-                              <Star 
-                                className={`h-4 w-4 ${
-                                  favoriteArticles.includes(article.id) 
-                                    ? 'fill-yellow-400 text-yellow-400' 
-                                    : 'text-gray-400'
-                                }`} 
-                              />
-                            </Button>
-                          </div>
-                        ))}
+                                    </CardContent>
+                                  </Card>
+                                </TooltipTrigger>
+                                {article.preview && (
+                                  <TooltipContent className="max-w-xs">
+                                    <p className="text-sm">{article.preview}</p>
+                                  </TooltipContent>
+                                )}
+                              </Tooltip>
+                            </div>
+                          );
+                        })}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
