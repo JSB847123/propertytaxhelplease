@@ -165,6 +165,13 @@ const lawArticles: LawArticle[] = [
   { id: "ltle-119-2", title: "지방세법 시행령 제119조의2", article: "부동산 과세자료분석 전담기구의 조직·운영 및 자료통보 등", url: "https://www.law.go.kr/법령/지방세법 시행령/제119조의2", category: "부동산 과세자료분석" },
   { id: "ltle-119-3", title: "지방세법 시행령 제119조의3", article: "종합부동산세 과세자료 관련 정보시스템", url: "https://www.law.go.kr/법령/지방세법 시행령/제119조의3", category: "부동산 과세자료분석" },
 
+  // 지방세특례제한법
+  { id: "ltsl-19-2", title: "지방세특례제한법 제19조의2", article: "아동복지시설에 대한 감면", url: "https://law.go.kr/법령/지방세특례제한법/제19조의2", category: "지방세특례제한법" },
+  { id: "ltsl-20", title: "지방세특례제한법 제20조", article: "노인복지시설에 대한 감면", url: "https://law.go.kr/법령/지방세특례제한법/제20조", category: "지방세특례제한법" },
+  { id: "ltsl-31", title: "지방세특례제한법 제31조", article: "공공임대주택 등에 대한 감면", url: "https://law.go.kr/법령/지방세특례제한법/제31조", category: "지방세특례제한법" },
+  { id: "ltsl-31-3", title: "지방세특례제한법 제31조의3", article: "장기일반민간임대주택 등에 대한 감면", url: "https://law.go.kr/법령/지방세특례제한법/제31조의3", category: "지방세특례제한법" },
+  { id: "ltsl-35", title: "지방세특례제한법 제35조", article: "주택담보노후연금보증 대상 주택에 대한 감면", url: "https://law.go.kr/법령/지방세특례제한법/제35조", category: "지방세특례제한법" },
+
   // 지역자원시설세 관련
   { id: "ltl-141", title: "지방세법 제141조", article: "목적", url: "https://www.law.go.kr/법령/지방세법/제141조", category: "지역자원시설세" },
   { id: "ltl-142", title: "지방세법 제142조", article: "과세대상", url: "https://www.law.go.kr/법령/지방세법/제142조", category: "지역자원시설세" },
