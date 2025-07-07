@@ -142,12 +142,20 @@ export const FAQ = () => {
               <Edit className="h-3 w-3 mr-1" />
               편집
             </Button>
-            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <Sheet open={isSheetOpen} onOpenChange={(open) => {
+              if (!open) {
+                setIsSheetOpen(false);
+              }
+            }}>
               <SheetTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={startAdd}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    startAdd();
+                  }}
                   disabled={faqItems.length >= 10}
                 >
                   <Plus className="h-3 w-3 mr-1" />
@@ -205,12 +213,21 @@ export const FAQ = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setIsSheetOpen(false)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsSheetOpen(false);
+                        }}
                       >
                         <X className="h-3 w-3 mr-1" />
                         취소
                       </Button>
-                      <Button type="submit">
+                      <Button 
+                        type="submit"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
                         <Save className="h-3 w-3 mr-1" />
                         저장
                       </Button>
