@@ -632,14 +632,29 @@ export const LawArticleList = ({
                                                        className="mt-1"
                                                      />
                                                    </div>
-                                                   <div className="flex justify-end gap-2">
-                                                     <Button variant="outline" size="sm" onClick={cancelEditTags}>
-                                                       취소
-                                                     </Button>
-                                                     <Button size="sm" onClick={saveTags}>
-                                                       저장
-                                                     </Button>
-                                                   </div>
+                                                    <div className="flex justify-end gap-2">
+                                                      <Button 
+                                                        variant="outline" 
+                                                        size="sm" 
+                                                        onClick={(e) => {
+                                                          e.preventDefault();
+                                                          e.stopPropagation();
+                                                          cancelEditTags();
+                                                        }}
+                                                      >
+                                                        취소
+                                                      </Button>
+                                                      <Button 
+                                                        size="sm" 
+                                                        onClick={(e) => {
+                                                          e.preventDefault();
+                                                          e.stopPropagation();
+                                                          saveTags();
+                                                        }}
+                                                      >
+                                                        저장
+                                                      </Button>
+                                                    </div>
                                                  </div>
                                                </DialogContent>
                                              </Dialog>
