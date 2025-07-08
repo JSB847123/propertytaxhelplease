@@ -129,51 +129,47 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* 검색 입력 */}
         <div className="relative">
           <div className="flex gap-2">
-            <Popover open={showSuggestions} onOpenChange={setShowSuggestions}>
-              <PopoverTrigger asChild>
-                <div className="flex-1 relative">
-                  <Input
-                    ref={inputRef}
-                    placeholder="키워드, 조문명, 조문내용으로 검색..."
-                    value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setShowSuggestions(e.target.value.length >= 1);
-                    }}
-                    onKeyPress={handleKeyPress}
-                    onFocus={() => setShowSuggestions(searchTerm.length >= 1)}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setTimeout(() => {
-                        inputRef.current?.focus();
-                      }, 0);
-                      setShowSuggestions(searchTerm.length >= 1);
-                    }}
-                    autoFocus
-                  />
+            <div className="flex-1 relative">
+              <Input
+                ref={inputRef}
+                placeholder="키워드, 조문명, 조문내용으로 검색..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setShowSuggestions(e.target.value.length >= 1);
+                }}
+                onKeyPress={handleKeyPress}
+                onFocus={() => setShowSuggestions(searchTerm.length >= 1)}
+                onBlur={(e) => {
+                  // 제안 목록 클릭 시에는 blur 무시
+                  if (!e.relatedTarget?.closest('[data-suggestions-container]')) {
+                    setTimeout(() => setShowSuggestions(false), 150);
+                  }
+                }}
+                autoFocus
+              />
+              
+              {/* 제안 목록 */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div 
+                  data-suggestions-container
+                  className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md max-h-[300px] overflow-y-auto"
+                >
+                  {suggestions.map((suggestion) => (
+                    <div
+                      key={suggestion}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <Search className="mr-2 h-4 w-4" />
+                      {suggestion}
+                    </div>
+                  ))}
                 </div>
-              </PopoverTrigger>
-              <PopoverContent className="w-full p-0" align="start" side="bottom">
-                {suggestions.length > 0 && (
-                  <div className="max-h-[300px] overflow-y-auto">
-                    {suggestions.map((suggestion) => (
-                      <div
-                        key={suggestion}
-                        onClick={() => handleSuggestionClick(suggestion)}
-                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                      >
-                        <Search className="mr-2 h-4 w-4" />
-                        {suggestion}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </PopoverContent>
-            </Popover>
+              )}
+            </div>
             
             <Button onClick={handleSearch}>
               <Search className="h-4 w-4" />
