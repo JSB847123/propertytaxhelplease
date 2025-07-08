@@ -122,16 +122,6 @@ export const UtilityBar = () => {
                 </PopoverContent>
               </Popover>
 
-              {/* 인쇄용 버전 토글 */}
-              <Button
-                variant={isPrintMode ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setIsPrintMode(!isPrintMode)}
-                title="인쇄용 버전 토글"
-              >
-                <Printer className="h-4 w-4" />
-              </Button>
-
               {/* 인쇄 버튼 */}
               <Button
                 variant="ghost"
