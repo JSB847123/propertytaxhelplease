@@ -31,7 +31,6 @@ const Index = () => {
       <header className="bg-card shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <h1 className="text-2xl font-bold text-foreground">재산세 법령 포털</h1>
-          <p className="text-sm text-muted-foreground mt-1">지방세 담당 공무원을 위한 법령 조회 시스템</p>
         </div>
       </header>
 
