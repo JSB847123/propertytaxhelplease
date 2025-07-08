@@ -27,6 +27,12 @@ const frequentSites: SiteLink[] = [
     title: "택스넷",
     url: "https://www.taxnet.co.kr/",
     description: "세무 관련 정보 포털"
+  },
+  {
+    id: "renthome",
+    title: "렌트홈",
+    url: "https://intra.renthome.go.kr/intraportal/login/login.open",
+    description: "임대주택 관리 시스템"
   }
 ];
 
