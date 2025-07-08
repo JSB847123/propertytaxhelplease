@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // 디바운싱 (300ms)
   useEffect(() => {
@@ -135,6 +136,7 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
               <PopoverTrigger asChild>
                 <div className="flex-1 relative">
                   <Input
+                    ref={inputRef}
                     placeholder="키워드, 조문명, 조문내용으로 검색..."
                     value={searchTerm}
                     onChange={(e) => {
@@ -144,7 +146,11 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
                     onKeyPress={handleKeyPress}
                     onFocus={() => setShowSuggestions(searchTerm.length >= 1)}
                     onClick={(e) => {
-                      e.currentTarget.focus();
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setTimeout(() => {
+                        inputRef.current?.focus();
+                      }, 0);
                       setShowSuggestions(searchTerm.length >= 1);
                     }}
                     autoFocus
