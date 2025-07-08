@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, X, Filter } from "lucide-react";
 import { advancedSearch, expandSynonyms } from "@/lib/searchUtils";
@@ -159,22 +159,18 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
               </PopoverTrigger>
               <PopoverContent className="w-full p-0" align="start" side="bottom">
                 {suggestions.length > 0 && (
-                  <Command>
-                    <CommandList>
-                      <CommandGroup>
-                        {suggestions.map((suggestion) => (
-                          <CommandItem
-                            key={suggestion}
-                            onSelect={() => handleSuggestionClick(suggestion)}
-                            className="cursor-pointer"
-                          >
-                            <Search className="mr-2 h-4 w-4" />
-                            {suggestion}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
+                  <div className="max-h-[300px] overflow-y-auto">
+                    {suggestions.map((suggestion) => (
+                      <div
+                        key={suggestion}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                      >
+                        <Search className="mr-2 h-4 w-4" />
+                        {suggestion}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </PopoverContent>
             </Popover>
