@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, X, Filter } from "lucide-react";
+import { Search, X, Filter, Settings } from "lucide-react";
 import { advancedSearch, expandSynonyms } from "@/lib/searchUtils";
 
 interface SearchSectionProps {
@@ -32,11 +32,54 @@ const CATEGORIES = [
   "지역자원시설세", "지방교육세", "민법 관련"
 ];
 
+const SEARCH_SCOPE_OPTIONS = {
+  law: [
+    { value: "all", label: "전체" },
+    { value: "keyword", label: "법령 키워드" },
+    { value: "title", label: "조문명" },
+    { value: "content", label: "조문 내용" }
+  ],
+  precedent: [
+    { value: "all", label: "전체" },
+    { value: "title", label: "판례명" },
+    { value: "content", label: "본문" }
+  ]
+};
+
+const COURT_TYPES = [
+  { value: "all", label: "전체" },
+  { value: "supreme", label: "대법원" },
+  { value: "lower", label: "하위법원" }
+];
+
+const SORT_OPTIONS = [
+  { value: "relevance", label: "관련도순" },
+  { value: "date_desc", label: "선고일자 최신순" },
+  { value: "date_asc", label: "선고일자 오래된순" },
+  { value: "case_name", label: "사건명순" }
+];
+
+const RESULT_COUNT_OPTIONS = [
+  { value: "10", label: "10개" },
+  { value: "20", label: "20개" },
+  { value: "50", label: "50개" },
+  { value: "100", label: "100개" }
+];
+
 export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount }: SearchSectionProps) => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  
+  // 새로운 상태들
+  const [searchType, setSearchType] = useState<"law" | "precedent">("law");
+  const [searchScope, setSearchScope] = useState("all");
+  const [courtType, setCourtType] = useState("all");
+  const [sortOption, setSortOption] = useState("relevance");
+  const [resultCountOption, setResultCountOption] = useState("20");
+  
   const inputRef = useRef<HTMLInputElement>(null);
 
   // 디바운싱 (300ms)
@@ -120,7 +163,7 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     <Card>
       <CardHeader>
         <CardTitle className="text-lg flex items-center justify-between">
-          법령 검색
+          법령 및 판례 검색
           {typeof resultCount === 'number' && (
             <span className="text-sm font-normal text-muted-foreground">
               {resultCount}개 결과
@@ -129,12 +172,103 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* 검색 타입 선택 */}
+        <div className="flex gap-2">
+          <Select value={searchType} onValueChange={(value: "law" | "precedent") => {
+            setSearchType(value);
+            setSearchScope("all"); // 검색 타입 변경 시 범위 초기화
+          }}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="law">법령</SelectItem>
+              <SelectItem value="precedent">판례</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={searchScope} onValueChange={setSearchScope}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SEARCH_SCOPE_OPTIONS[searchType].map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Button 
+            variant="outline" 
+            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+            className="flex items-center gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            고급옵션
+          </Button>
+        </div>
+
+        {/* 고급 옵션 (판례 검색용) */}
+        {showAdvancedOptions && searchType === "precedent" && (
+          <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+            <div>
+              <label className="text-sm font-medium mb-2 block">법원 종류</label>
+              <Select value={courtType} onValueChange={setCourtType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {COURT_TYPES.map((court) => (
+                    <SelectItem key={court.value} value={court.value}>
+                      {court.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block">정렬 옵션</label>
+              <Select value={sortOption} onValueChange={setSortOption}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SORT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block">결과 개수</label>
+              <Select value={resultCountOption} onValueChange={setResultCountOption}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RESULT_COUNT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
         <div className="relative">
           <div className="flex gap-2">
             <div className="flex-1 relative">
               <Input
                 ref={inputRef}
-                placeholder="키워드, 조문명, 조문내용으로 검색..."
+                placeholder={searchType === "law" ? "키워드, 조문명, 조문내용으로 검색..." : "판례명, 본문으로 검색..."}
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
