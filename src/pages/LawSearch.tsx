@@ -71,7 +71,7 @@ const LawSearch = () => {
   };
 
   const handleItemClick = (item: LawData | PrecedentData) => {
-    const id = 'law' in searchData?.searchType 
+    const id = searchData?.searchType === 'law'
       ? (item as LawData).법령ID 
       : (item as PrecedentData).판례정보일련번호;
     const target = searchData?.searchType === 'law' ? 'lawview' : 'precview';
