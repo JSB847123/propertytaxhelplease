@@ -45,17 +45,19 @@ const LawSearch = () => {
     queryFn: async () => {
       if (!searchQuery.trim()) return null;
 
-      const { data, error } = await supabase.functions.invoke('law-search', {
-        body: {
-          q: searchQuery.trim(),
-          target: searchType,
-          search: searchScope,
-          display: resultsPerPage.toString(),
-          page: currentPage.toString()
+      const response = await fetch(`https://wouwaifqgzlwnkvpnndg.supabase.co/functions/v1/law-search?q=${encodeURIComponent(searchQuery.trim())}&target=${searchType}&search=${searchScope}&display=${resultsPerPage}&page=${currentPage}`, {
+        method: 'GET',
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ',
+          'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ',
         }
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error(`API 호출 실패: ${response.status}`);
+      }
+
+      const data = await response.json();
       return data;
     },
     enabled: isSearchTriggered && !!searchQuery.trim(),
@@ -164,7 +166,42 @@ const LawSearch = () => {
     // 결과 데이터 처리
     let results: SearchResult[] = [];
     if (searchResults?.success && searchResults?.data) {
-      // XML 파싱된 결과 처리 로직 필요
+      const responseData = searchResults.data;
+      
+      // XML 파싱된 결과 처리
+      if (searchType === 'law') {
+        // 법령 결과 처리
+        if (responseData.LawSearch?.law) {
+          const laws = Array.isArray(responseData.LawSearch.law) 
+            ? responseData.LawSearch.law 
+            : [responseData.LawSearch.law];
+          
+          results = laws.map((law: any) => ({
+            법령명: law.법령명 || law['@_법령명'] || law.name,
+            공포일자: law.공포일자 || law['@_공포일자'] || law.promulgationDate,
+            시행일자: law.시행일자 || law['@_시행일자'] || law.enforcementDate,
+            소관부처: law.소관부처 || law['@_소관부처'] || law.department,
+            법령ID: law.법령ID || law['@_법령ID'] || law.id
+          }));
+        }
+      } else {
+        // 판례 결과 처리
+        if (responseData.PrecSearch?.prec) {
+          const precs = Array.isArray(responseData.PrecSearch.prec) 
+            ? responseData.PrecSearch.prec 
+            : [responseData.PrecSearch.prec];
+          
+          results = precs.map((prec: any) => ({
+            사건명: prec.사건명 || prec['@_사건명'] || prec.caseName,
+            사건번호: prec.사건번호 || prec['@_사건번호'] || prec.caseNumber,
+            선고일자: prec.선고일자 || prec['@_선고일자'] || prec.judgmentDate,
+            법원명: prec.법원명 || prec['@_법원명'] || prec.courtName,
+            판례정보일련번호: prec.판례정보일련번호 || prec['@_판례정보일련번호'] || prec.serialNumber
+          }));
+        }
+      }
+    } else if (searchResults?.data) {
+      // 직접적인 배열인 경우
       results = Array.isArray(searchResults.data) ? searchResults.data : [];
     }
 

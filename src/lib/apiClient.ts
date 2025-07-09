@@ -125,28 +125,34 @@ export const searchLawOrPrecedent = async (
   try {
     console.log('API 호출 시작:', params);
     
-    // URL 쿼리 파라미터 생성
-    const queryParams = new URLSearchParams();
-    if (params.query) queryParams.append('q', params.query);
-    if (params.target) queryParams.append('target', params.target);
-    if (params.search) queryParams.append('search', params.search);
-    if (params.display) queryParams.append('display', params.display.toString());
-    if (params.page) queryParams.append('page', params.page.toString());
+    // URL 쿼리 파라미터로 전달
+    const searchParams = new URLSearchParams();
+    if (params.query) searchParams.append('q', params.query);
+    if (params.target) searchParams.append('target', params.target);
+    if (params.search) searchParams.append('search', params.search);
+    if (params.display) searchParams.append('display', params.display.toString());
+    if (params.page) searchParams.append('page', params.page.toString());
 
-    const { data, error } = await supabase.functions.invoke('law-search', {
-      body: Object.fromEntries(queryParams)
+    // Edge Function 호출 (GET 방식)
+    const functionUrl = `https://wouwaifqgzlwnkvpnndg.supabase.co/functions/v1/law-search?${searchParams.toString()}`;
+    
+    const response = await fetch(functionUrl, {
+      method: 'GET',
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ',
+        'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ',
+        'Content-Type': 'application/json'
+      },
+      signal: controller.signal
     });
 
-    clearTimeout(timeoutId);
-
-    if (error) {
-      console.error('Supabase Edge Function 오류:', error);
-      throw classifyError(error);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Edge Function 응답 오류:', response.status, errorText);
+      throw new APIResponseError(`서버 오류: ${response.status}`, response.status, errorText);
     }
 
-    if (!data) {
-      throw new APIResponseError('응답 데이터가 없습니다.', 204);
-    }
+    const data = await response.text();
 
     console.log('API 응답 수신 완료');
     return typeof data === 'string' ? data : JSON.stringify(data);
