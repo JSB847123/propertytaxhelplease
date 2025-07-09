@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 export interface SearchHistoryItem {
   id: string;
   query: string;
-  type: 'law' | 'precedent';
+  type: 'law' | 'prec';
   timestamp: number;
   resultCount?: number;
 }
@@ -38,7 +38,7 @@ export const useSearchHistory = () => {
   }, []);
 
   // 새 검색 기록 추가
-  const addSearchHistory = useCallback((query: string, type: 'law' | 'precedent', resultCount?: number) => {
+  const addSearchHistory = useCallback((query: string, type: 'law' | 'prec', resultCount?: number) => {
     if (!query.trim()) return;
 
     const newItem: SearchHistoryItem = {
@@ -78,11 +78,10 @@ export const useSearchHistory = () => {
   }, []);
 
   // 검색 기록에서 검색 (최근 검색어 자동완성용)
-  const getRecentSearches = useCallback((type?: 'law' | 'precedent', limit: number = 5) => {
+  const getRecentSearches = useCallback((type?: 'law' | 'prec', limit: number = 5) => {
     return history
       .filter(item => !type || item.type === type)
-      .slice(0, limit)
-      .map(item => item.query);
+      .slice(0, limit);
   }, [history]);
 
   return {

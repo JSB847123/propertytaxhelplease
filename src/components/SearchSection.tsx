@@ -133,15 +133,23 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     );
     
     // 최근 검색어 매치  
-    const recentSearches = getRecentSearches(searchType === 'precedent' ? 'precedent' : 'law', 3)
-      .filter(recent => recent.toLowerCase().includes(searchTerm.toLowerCase()));
+    const recentSearches = getRecentSearches(searchType === 'precedent' ? 'prec' : 'law', 3)
+      .filter(recent => recent.query.toLowerCase().includes(searchTerm.toLowerCase()));
     
     // 중복 제거 후 상위 8개 반환 (최근 검색어 우선)
-    const allMatches = [
+    const allMatches: (string | typeof recentSearches[0])[] = [
       ...recentSearches,
-      ...new Set([...matchedTerms, ...synonymMatches])
+      ...matchedTerms,
+      ...synonymMatches
     ];
-    return Array.from(new Set(allMatches)).slice(0, 8);
+    
+    // 중복 제거 (문자열과 객체 모두 고려)
+    const uniqueMatches = allMatches.filter((item, index, self) => {
+      const itemText = typeof item === 'string' ? item : item.query;
+      return index === self.findIndex(i => (typeof i === 'string' ? i : i.query) === itemText);
+    });
+    
+    return uniqueMatches.slice(0, 8);
   }, [searchTerm, searchType, getRecentSearches]);
 
   const handleAPISearch = async (query: string) => {
@@ -163,7 +171,7 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     if (result) {
       addSearchHistory(
         query.trim(), 
-        searchType === 'precedent' ? 'precedent' : 'law',
+        searchType === 'precedent' ? 'prec' : 'law',
         data ? data.length : undefined
       );
     }
@@ -357,15 +365,17 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
                   className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md max-h-[300px] overflow-y-auto"
                 >
                   {suggestions.map((suggestion, index) => {
-                    const isRecentSearch = getRecentSearches(searchType === 'precedent' ? 'precedent' : 'law', 3).includes(suggestion);
+                    const suggestionText = typeof suggestion === 'string' ? suggestion : suggestion.query;
+                    const recentSearches = getRecentSearches(searchType === 'precedent' ? 'prec' : 'law', 3);
+                    const isRecentSearch = recentSearches.some(recent => recent.query === suggestionText);
                     return (
                       <div
-                        key={suggestion}
-                        onClick={() => handleSuggestionClick(suggestion)}
+                        key={typeof suggestion === 'string' ? suggestion : suggestion.id}
+                        onClick={() => handleSuggestionClick(suggestionText)}
                         className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
                       >
                         <Search className="mr-2 h-4 w-4" />
-                        <span className={isRecentSearch ? "font-medium" : ""}>{suggestion}</span>
+                        <span className={isRecentSearch ? "font-medium" : ""}>{suggestionText}</span>
                         {isRecentSearch && (
                           <Badge variant="secondary" className="ml-auto text-xs">
                             최근
@@ -460,7 +470,7 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     {/* 검색 결과 */}
     {!isLoading && !error && data && searchType === 'precedent' && (
       <PrecedentList 
-        precedents={data as PrecedentData[]}
+        precedents={data as import('@/lib/xmlParser').PrecedentData[]}
         searchTerm={searchTerm}
       />
     )}

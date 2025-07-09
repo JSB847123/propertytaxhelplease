@@ -20,21 +20,26 @@ const parserOptions = {
 const parser = new XMLParser(parserOptions);
 
 export interface LawData {
-  lawId?: string;
-  lawName?: string;
-  lawType?: string;
-  promulgationDate?: string;
-  content?: string;
+  lsId?: string;
+  lsNm?: string;
+  lsTypeCd?: string;
+  promulgationDt?: string;
+  enfcDt?: string;
+  admstNm?: string;
+  lsRsnCn?: string;
   [key: string]: any;
 }
 
 export interface PrecedentData {
-  caseTitle: string;
-  caseNumber: string;
-  judgmentDate: string;
-  courtName: string;
-  judgmentType: string;
-  caseContent?: string;
+  caseNm?: string;
+  caseNo?: string;
+  judmnAdjuDt?: string;
+  courtName?: string;
+  judmnAdjuDeclCd?: string;
+  abstrct?: string;
+  refrnc?: string;
+  judmnAdjuGbnCd?: string;
+  [key: string]: any;
 }
 
 // 법령 XML 파싱
@@ -52,11 +57,13 @@ export const parseLawXML = (xmlString: string): LawData[] => {
     }
     
     return lawList.map((law: any) => ({
-      lawId: law['@_lawId'] || law.lawId || '',
-      lawName: law['@_lawName'] || law.lawName || law['#text'] || '',
-      lawType: law['@_lawType'] || law.lawType || '',
-      promulgationDate: law['@_promulgationDate'] || law.promulgationDate || '',
-      content: law.content || law['#text'] || '',
+      lsId: law.lsId || law['@_lsId'] || '',
+      lsNm: law.lsNm || law['@_lsNm'] || law['#text'] || '',
+      lsTypeCd: law.lsTypeCd || law['@_lsTypeCd'] || '',
+      promulgationDt: law.promulgationDt || law['@_promulgationDt'] || '',
+      enfcDt: law.enfcDt || law['@_enfcDt'] || '',
+      admstNm: law.admstNm || law['@_admstNm'] || '',
+      lsRsnCn: law.lsRsnCn || law.content || law['#text'] || '',
       ...law
     }));
   } catch (error) {
@@ -86,12 +93,15 @@ export const parsePrecedentJSON = (jsonString: string): PrecedentData[] => {
     }
     
     return precedentList.map((item: any) => ({
-      caseTitle: item.판례명 || item.caseName || item.title || '',
-      caseNumber: item.사건번호 || item.caseNumber || item.number || '',
-      judgmentDate: item.선고일자 || item.judgmentDate || item.date || '',
-      courtName: item.법원명 || item.courtName || item.court || '',
-      judgmentType: item.판결유형 || item.judgmentType || item.type || '판결',
-      caseContent: item.판례내용 || item.content || item.summary || ''
+      caseNm: item.caseNm || item.판례명 || item.caseName || item.title || '',
+      caseNo: item.caseNo || item.사건번호 || item.caseNumber || item.number || '',
+      judmnAdjuDt: item.judmnAdjuDt || item.선고일자 || item.judgmentDate || item.date || '',
+      courtName: item.courtName || item.법원명 || item.court || '',
+      judmnAdjuDeclCd: item.judmnAdjuDeclCd || item.판결유형 || item.judgmentType || item.type || '판결',
+      abstrct: item.abstrct || item.판례내용 || item.content || item.summary || '',
+      refrnc: item.refrnc || item.참조조문 || item.reference || '',
+      judmnAdjuGbnCd: item.judmnAdjuGbnCd || item.심급구분 || item.level || '',
+      ...item
     }));
   } catch (error) {
     console.error('JSON 파싱 오류:', error);

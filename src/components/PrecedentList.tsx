@@ -1,15 +1,7 @@
 import { PrecedentCard } from "./PrecedentCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Search } from "lucide-react";
-
-interface PrecedentData {
-  caseTitle: string;
-  caseNumber: string;
-  judgmentDate: string;
-  courtName: string;
-  judgmentType: string;
-  caseContent?: string;
-}
+import { AlertCircle, Search, FileText } from "lucide-react";
+import type { PrecedentData } from "@/lib/xmlParser";
 
 interface PrecedentListProps {
   precedents: PrecedentData[];
@@ -85,18 +77,16 @@ export const PrecedentList = ({
       
       {precedents.map((precedent, index) => (
         <PrecedentCard
-          key={`${precedent.caseNumber}-${index}`}
-          caseTitle={precedent.caseTitle}
-          caseNumber={precedent.caseNumber}
-          judgmentDate={precedent.judgmentDate}
-          courtName={precedent.courtName}
-          judgmentType={precedent.judgmentType}
-          caseContent={precedent.caseContent}
+          key={`${precedent.caseNo || index}-${index}`}
+          caseTitle={precedent.caseNm || ''}
+          caseNumber={precedent.caseNo || ''}
+          judgmentDate={precedent.judmnAdjuDt || ''}
+          courtName={precedent.courtName || ''}
+          judgmentType={precedent.judmnAdjuDeclCd || ''}
+          caseContent={precedent.abstrct}
         />
       ))}
     </div>
   );
 };
 
-// FileText import 추가
-import { FileText } from "lucide-react";
