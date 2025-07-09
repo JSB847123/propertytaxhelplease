@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Search, X, Filter, Settings } from "lucide-react";
 import { advancedSearch, expandSynonyms } from "@/lib/searchUtils";
 import { useSearchAPI } from "@/hooks/useSearchAPI";
+import { useSearchHistory } from "@/hooks/useSearchHistory";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorDisplay } from "./ErrorDisplay";
 import { PrecedentList } from "./PrecedentList";
@@ -73,6 +74,7 @@ const RESULT_COUNT_OPTIONS = [
 
 export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount }: SearchSectionProps) => {
   const { data, isLoading, error, search, retry, reset } = useSearchAPI();
+  const { addSearchHistory, getRecentSearches } = useSearchHistory();
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -115,25 +117,32 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     }
   }, [debouncedSearchTerm, activeFilters, onSearch, reset]);
 
-  // 자동완성 제안 - 고급 검색 적용
+  // 자동완성 제안 - 고급 검색 + 검색 기록 적용
   const suggestions = useMemo(() => {
     if (!searchTerm || searchTerm.length < 1) return [];
     
-    // 직접 매치 + 유의어 매치 + 초성 매치
+    // 법률 용어 매치
     const matchedTerms = LEGAL_TERMS.filter(term => 
       advancedSearch(term, searchTerm)
     );
     
-    // 검색어의 유의어도 제안에 포함
+    // 유의어 매치
     const synonyms = expandSynonyms(searchTerm.toLowerCase());
     const synonymMatches = LEGAL_TERMS.filter(term =>
       synonyms.some(synonym => term.toLowerCase().includes(synonym))
     );
     
-    // 중복 제거 후 상위 8개 반환
-    const allMatches = [...new Set([...matchedTerms, ...synonymMatches])];
-    return allMatches.slice(0, 8);
-  }, [searchTerm]);
+    // 최근 검색어 매치  
+    const recentSearches = getRecentSearches(searchType === 'precedent' ? 'precedent' : 'law', 3)
+      .filter(recent => recent.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    // 중복 제거 후 상위 8개 반환 (최근 검색어 우선)
+    const allMatches = [
+      ...recentSearches,
+      ...new Set([...matchedTerms, ...synonymMatches])
+    ];
+    return Array.from(new Set(allMatches)).slice(0, 8);
+  }, [searchTerm, searchType, getRecentSearches]);
 
   const handleAPISearch = async (query: string) => {
     if (!query.trim()) return;
@@ -148,7 +157,16 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
       })
     };
 
-    await search(searchParams);
+    const result = await search(searchParams);
+    
+    // 검색 성공 시 기록 저장
+    if (result) {
+      addSearchHistory(
+        query.trim(), 
+        searchType === 'precedent' ? 'precedent' : 'law',
+        data ? data.length : undefined
+      );
+    }
   };
 
   const handleSearch = () => {
@@ -338,16 +356,24 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
                   data-suggestions-container
                   className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md max-h-[300px] overflow-y-auto"
                 >
-                  {suggestions.map((suggestion) => (
-                    <div
-                      key={suggestion}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                    >
-                      <Search className="mr-2 h-4 w-4" />
-                      {suggestion}
-                    </div>
-                  ))}
+                  {suggestions.map((suggestion, index) => {
+                    const isRecentSearch = getRecentSearches(searchType === 'precedent' ? 'precedent' : 'law', 3).includes(suggestion);
+                    return (
+                      <div
+                        key={suggestion}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                      >
+                        <Search className="mr-2 h-4 w-4" />
+                        <span className={isRecentSearch ? "font-medium" : ""}>{suggestion}</span>
+                        {isRecentSearch && (
+                          <Badge variant="secondary" className="ml-auto text-xs">
+                            최근
+                          </Badge>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

@@ -7,8 +7,8 @@ interface UseSearchAPIResult {
   data: LawData[] | PrecedentData[] | null;
   isLoading: boolean;
   error: APIError | null;
-  search: (params: SearchParams) => Promise<void>;
-  retry: () => Promise<void>;
+  search: (params: SearchParams) => Promise<boolean>;
+  retry: () => Promise<boolean>;
   reset: () => void;
 }
 
@@ -34,24 +34,27 @@ export const useSearchAPI = (): UseSearchAPIResult => {
       
       console.log('파싱된 데이터:', parsedData);
       setData(parsedData);
+      return true; // 성공
       
     } catch (err: any) {
       console.error('검색 오류:', err);
       setError(err as APIError);
       setData(null);
+      return false; // 실패
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   const search = useCallback(async (params: SearchParams) => {
-    await performSearch(params);
+    return await performSearch(params);
   }, [performSearch]);
 
   const retry = useCallback(async () => {
     if (lastSearchParams) {
-      await performSearch(lastSearchParams);
+      return await performSearch(lastSearchParams);
     }
+    return false;
   }, [lastSearchParams, performSearch]);
 
   const reset = useCallback(() => {
