@@ -231,7 +231,7 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center justify-between">
-            법령 및 판례 검색
+            검색
             {typeof resultCount === 'number' && (
               <span className="text-sm font-normal text-muted-foreground">
                 {resultCount}개 결과

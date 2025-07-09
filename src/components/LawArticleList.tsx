@@ -518,7 +518,7 @@ export const LawArticleList = ({
     <Card>
       <CardHeader>
         <CardTitle className="text-lg flex items-center justify-between">
-          재산세 관련 법령 조문
+          재산세 관련 법령
           {activeTagFilter && (
             <div className="flex items-center gap-2">
               <Badge variant="default" className="text-sm">
