@@ -8,9 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, X, Filter, Settings } from "lucide-react";
 import { advancedSearch, expandSynonyms } from "@/lib/searchUtils";
+import { useSearchAPI } from "@/hooks/useSearchAPI";
+import { LoadingSpinner } from "./LoadingSpinner";
+import { ErrorDisplay } from "./ErrorDisplay";
+import { PrecedentList } from "./PrecedentList";
+import type { PrecedentData } from "@/lib/xmlParser";
 
 interface SearchSectionProps {
-  onSearch: (term: string, filters: string[]) => void;
+  onSearch?: (term: string, filters: string[]) => void;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   resultCount?: number;
@@ -67,6 +72,7 @@ const RESULT_COUNT_OPTIONS = [
 ];
 
 export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount }: SearchSectionProps) => {
+  const { data, isLoading, error, search, retry, reset } = useSearchAPI();
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -91,14 +97,23 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // 실시간 검색
+  // 실시간 검색 - API 호출
   useEffect(() => {
-    if (debouncedSearchTerm.length >= 1 || activeFilters.length > 0) {
-      onSearch(debouncedSearchTerm, activeFilters);
+    if (debouncedSearchTerm.length >= 1) {
+      handleAPISearch(debouncedSearchTerm);
     } else {
-      onSearch("", []);
+      reset();
     }
-  }, [debouncedSearchTerm, activeFilters, onSearch]);
+    
+    // 기존 onSearch 콜백 호출 (하위 호환성)
+    if (onSearch) {
+      if (debouncedSearchTerm.length >= 1 || activeFilters.length > 0) {
+        onSearch(debouncedSearchTerm, activeFilters);
+      } else {
+        onSearch("", []);
+      }
+    }
+  }, [debouncedSearchTerm, activeFilters, onSearch, reset]);
 
   // 자동완성 제안 - 고급 검색 적용
   const suggestions = useMemo(() => {
@@ -120,10 +135,31 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     return allMatches.slice(0, 8);
   }, [searchTerm]);
 
+  const handleAPISearch = async (query: string) => {
+    if (!query.trim()) return;
+
+    const searchParams = {
+      target: searchType === 'precedent' ? 'prec' as const : 'law' as const,
+      query: query.trim(),
+      ...(searchType === 'precedent' && {
+        search: searchScope === 'title' ? '1' : searchScope === 'content' ? '2' : '0',
+        display: parseInt(resultCountOption),
+        page: 1
+      })
+    };
+
+    await search(searchParams);
+  };
+
   const handleSearch = () => {
     if (searchTerm.trim()) {
-      onSearch(searchTerm, activeFilters);
+      handleAPISearch(searchTerm);
       setShowSuggestions(false);
+      
+      // 기존 onSearch 콜백 호출 (하위 호환성)
+      if (onSearch) {
+        onSearch(searchTerm, activeFilters);
+      }
     }
   };
 
@@ -136,7 +172,12 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
   const handleSuggestionClick = (suggestion: string) => {
     setSearchTerm(suggestion);
     setShowSuggestions(false);
-    onSearch(suggestion, activeFilters);
+    handleAPISearch(suggestion);
+    
+    // 기존 onSearch 콜백 호출 (하위 호환성)  
+    if (onSearch) {
+      onSearch(suggestion, activeFilters);
+    }
   };
 
   const toggleFilter = (category: string) => {
@@ -160,17 +201,23 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center justify-between">
-          법령 및 판례 검색
-          {typeof resultCount === 'number' && (
-            <span className="text-sm font-normal text-muted-foreground">
-              {resultCount}개 결과
-            </span>
-          )}
-        </CardTitle>
-      </CardHeader>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center justify-between">
+            법령 및 판례 검색
+            {typeof resultCount === 'number' && (
+              <span className="text-sm font-normal text-muted-foreground">
+                {resultCount}개 결과
+              </span>
+            )}
+            {data && Array.isArray(data) && (
+              <span className="text-sm font-normal text-muted-foreground">
+                {data.length}개 결과
+              </span>
+            )}
+          </CardTitle>
+        </CardHeader>
       <CardContent className="space-y-4">
         {/* 검색 타입 선택 */}
         <div className="flex gap-2">
@@ -367,5 +414,42 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
         )}
       </CardContent>
     </Card>
+
+    {/* 로딩 상태 */}
+    {isLoading && (
+      <LoadingSpinner 
+        type={searchType} 
+        message={searchType === 'law' ? '법령을 검색하고 있습니다...' : '판례를 검색하고 있습니다...'}
+      />
+    )}
+
+    {/* 에러 상태 */}
+    {error && (
+      <ErrorDisplay 
+        error={error} 
+        onRetry={retry}
+      />
+    )}
+
+    {/* 검색 결과 */}
+    {!isLoading && !error && data && searchType === 'precedent' && (
+      <PrecedentList 
+        precedents={data as PrecedentData[]}
+        searchTerm={searchTerm}
+      />
+    )}
+
+    {/* 법령 검색 결과는 기존 방식 유지 */}
+    {!isLoading && !error && data && searchType === 'law' && (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-muted-foreground">
+            <p>법령 검색 결과: {data.length}건</p>
+            <p className="text-sm mt-2">법령 검색 결과 표시 컴포넌트를 구현해주세요.</p>
+          </div>
+        </CardContent>
+      </Card>
+    )}
+  </div>
   );
 };
