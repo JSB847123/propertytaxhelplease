@@ -2,3 +2,6 @@ project_id = "wouwaifqgzlwnkvpnndg"
 
 [functions.law-proxy]
 verify_jwt = false
+
+[functions.law-search]
+verify_jwt = false
