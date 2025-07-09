@@ -125,8 +125,16 @@ export const searchLawOrPrecedent = async (
   try {
     console.log('API 호출 시작:', params);
     
-    const { data, error } = await supabase.functions.invoke('law-proxy', {
-      body: params
+    // URL 쿼리 파라미터 생성
+    const queryParams = new URLSearchParams();
+    if (params.query) queryParams.append('q', params.query);
+    if (params.target) queryParams.append('target', params.target);
+    if (params.search) queryParams.append('search', params.search);
+    if (params.display) queryParams.append('display', params.display.toString());
+    if (params.page) queryParams.append('page', params.page.toString());
+
+    const { data, error } = await supabase.functions.invoke('law-search', {
+      body: Object.fromEntries(queryParams)
     });
 
     clearTimeout(timeoutId);
