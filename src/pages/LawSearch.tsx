@@ -30,6 +30,18 @@ const LawSearch = () => {
       });
 
       // 고급 검색 옵션 추가
+      if (searchData.sort) {
+        searchParams.append('sort', searchData.sort);
+      }
+      if (searchData.order) {
+        searchParams.append('order', searchData.order);
+      }
+      if (searchData.ancYd) {
+        searchParams.append('ancYd', searchData.ancYd);
+      }
+      if (searchData.ancYdEnd) {
+        searchParams.append('ancYdEnd', searchData.ancYdEnd);
+      }
       if (searchData.dateFrom) {
         searchParams.append('dateFrom', searchData.dateFrom.toISOString().split('T')[0]);
       }

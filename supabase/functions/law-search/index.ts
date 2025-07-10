@@ -25,7 +25,14 @@ serve(async (req) => {
     const target = searchParams.get('target') || 'law'; // law, prec, lawview, precview
     const page = searchParams.get('page') || '1';
     const display = Math.min(parseInt(searchParams.get('display') || '20'), 100).toString();
-    const search = searchParams.get('search') || '0'; // 1:제목, 2:본문, 0:전체
+    const search = searchParams.get('search') || '1'; // 1:제목, 2:본문, 0:전체
+    
+    // 고급 검색 파라미터
+    const sort = searchParams.get('sort') || 'date'; // date, score
+    const order = searchParams.get('order') || 'desc'; // asc, desc
+    const ancYd = searchParams.get('ancYd') || ''; // 공포일자 시작
+    const ancYdEnd = searchParams.get('ancYdEnd') || ''; // 공포일자 종료
+    const department = searchParams.get('department') || ''; // 소관부처
     
     // 환경변수에서 인증키 가져오기 (없으면 기본값 사용)
     const lawOC = Deno.env.get('LAW_OC') || 'bahnntf';
@@ -48,13 +55,21 @@ serve(async (req) => {
     // 법제처 API 사용
     const apiUrl = 'https://www.law.go.kr/DRF/lawSearch.do';
     const apiParams = new URLSearchParams({
-      OC: 'bahnntf',
-      target: 'law',
+      OC: lawOC,
+      target: target,
       type: 'JSON',
-      query: query,
+      query: query.trim(),
       display: display,
-      page: page
+      page: page,
+      search: search
     });
+
+    // 고급 검색 파라미터 조건부 추가
+    if (sort) apiParams.append('sort', sort);
+    if (order) apiParams.append('order', order);
+    if (ancYd) apiParams.append('ancYd', ancYd);
+    if (ancYdEnd) apiParams.append('ancYdEnd', ancYdEnd);
+    if (department) apiParams.append('department', department);
 
     console.log('API 호출 URL:', `${apiUrl}?${apiParams.toString()}`);
 

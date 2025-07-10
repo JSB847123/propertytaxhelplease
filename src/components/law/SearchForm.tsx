@@ -23,6 +23,10 @@ export interface SearchFormData {
   court?: string;
   department?: string;
   resultCount: number;
+  sort?: "date" | "score";
+  order?: "asc" | "desc";
+  ancYd?: string; // 공포일자 시작
+  ancYdEnd?: string; // 공포일자 종료
 }
 
 interface SearchFormProps {
@@ -52,12 +56,16 @@ export const SearchForm = ({ onSearch, isLoading = false, defaultValues }: Searc
   const [formData, setFormData] = useState<SearchFormData>({
     query: defaultValues?.query || "",
     searchType: defaultValues?.searchType || "law",
-    searchScope: defaultValues?.searchScope || "0",
+    searchScope: defaultValues?.searchScope || "1",
     dateFrom: defaultValues?.dateFrom,
     dateTo: defaultValues?.dateTo,
     court: defaultValues?.court || "all",
     department: defaultValues?.department || "",
     resultCount: defaultValues?.resultCount || 20,
+    sort: defaultValues?.sort || "date",
+    order: defaultValues?.order || "desc",
+    ancYd: defaultValues?.ancYd || "",
+    ancYdEnd: defaultValues?.ancYdEnd || "",
   });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
