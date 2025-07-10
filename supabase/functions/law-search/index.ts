@@ -45,16 +45,15 @@ serve(async (req) => {
       );
     }
 
-    // 새로운 법제처 API 사용
-    const apiUrl = 'https://open.law.go.kr/LSO/openApi/list_sample.json';
+    // 법제처 API 사용
+    const apiUrl = 'https://www.law.go.kr/DRF/lawSearch.do';
     const apiParams = new URLSearchParams({
       OC: 'bahnntf',
-      target: target === 'prec' ? 'prec' : 'law',
+      target: 'law',
       type: 'JSON',
       query: query,
       display: display,
-      page: page,
-      search: search
+      page: page
     });
 
     console.log('API 호출 URL:', `${apiUrl}?${apiParams.toString()}`);
