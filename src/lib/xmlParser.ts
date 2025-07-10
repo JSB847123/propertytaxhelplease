@@ -72,39 +72,80 @@ export const parseLawXML = (xmlString: string): LawData[] => {
   }
 };
 
-// 판례 JSON 파싱 (API가 JSON을 반환하는 경우)
-export const parsePrecedentJSON = (jsonString: string): PrecedentData[] => {
+// 법제처 API JSON 응답 파싱 (법령 및 판례 통합)
+export const parseLawSearchJSON = (jsonString: string): (LawData | PrecedentData)[] => {
   try {
-    const data = JSON.parse(jsonString);
+    // Edge Function에서 wrapping된 응답 파싱
+    const response = JSON.parse(jsonString);
     
-    // API 응답 구조에 따라 데이터 추출
-    let precedentList: any[] = [];
-    
-    if (data.PrecedentSearch) {
-      precedentList = Array.isArray(data.PrecedentSearch) 
-        ? data.PrecedentSearch 
-        : [data.PrecedentSearch];
-    } else if (data.items) {
-      precedentList = Array.isArray(data.items) 
-        ? data.items 
-        : [data.items];
-    } else if (Array.isArray(data)) {
-      precedentList = data;
+    // Edge Function 응답 구조: { success: true, data: {...}, meta: {...} }
+    let data = response;
+    if (response.success && response.data) {
+      data = response.data;
     }
     
-    return precedentList.map((item: any) => ({
-      caseNm: item.caseNm || item.판례명 || item.caseName || item.title || '',
-      caseNo: item.caseNo || item.사건번호 || item.caseNumber || item.number || '',
-      judmnAdjuDt: item.judmnAdjuDt || item.선고일자 || item.judgmentDate || item.date || '',
-      courtName: item.courtName || item.법원명 || item.court || '',
-      judmnAdjuDeclCd: item.judmnAdjuDeclCd || item.판결유형 || item.judgmentType || item.type || '판결',
-      abstrct: item.abstrct || item.판례내용 || item.content || item.summary || '',
-      refrnc: item.refrnc || item.참조조문 || item.reference || '',
-      judmnAdjuGbnCd: item.judmnAdjuGbnCd || item.심급구분 || item.level || '',
-      ...item
-    }));
+    console.log('파싱할 데이터:', data);
+    
+    // 법령 검색 응답 구조: { LawSearch: { law: [...], totalCnt: "0", ... } }
+    if (data.LawSearch) {
+      const lawSearch = data.LawSearch;
+      
+      // totalCnt가 "0"이면 빈 배열 반환
+      if (lawSearch.totalCnt === "0" || parseInt(lawSearch.totalCnt) === 0) {
+        console.log('검색 결과 없음 - totalCnt:', lawSearch.totalCnt);
+        return [];
+      }
+      
+      // law 배열이 있으면 파싱
+      if (lawSearch.law) {
+        const lawList = Array.isArray(lawSearch.law) ? lawSearch.law : [lawSearch.law];
+        
+        return lawList.map((law: any) => ({
+          lsId: law.법령ID || law.lsId || '',
+          lsNm: law.법령명한글 || law.법령명 || law.lsNm || '',
+          lsTypeCd: law.법령구분명 || law.lsTypeCd || '',
+          promulgationDt: law.공포일자 || law.promulgationDt || '',
+          enfcDt: law.시행일자 || law.enfcDt || '',
+          admstNm: law.소관부처명 || law.admstNm || '',
+          lsRsnCn: law.법령약칭명 || law.lsRsnCn || '',
+          ...law
+        }));
+      }
+    }
+    
+    // 판례 검색 응답 구조 처리
+    if (data.PrecedentSearch) {
+      const precedentSearch = data.PrecedentSearch;
+      
+      if (precedentSearch.totalCnt === "0" || parseInt(precedentSearch.totalCnt) === 0) {
+        return [];
+      }
+      
+      if (precedentSearch.precedent) {
+        const precedentList = Array.isArray(precedentSearch.precedent) 
+          ? precedentSearch.precedent 
+          : [precedentSearch.precedent];
+        
+        return precedentList.map((item: any) => ({
+          caseNm: item.사건명 || item.caseNm || '',
+          caseNo: item.사건번호 || item.caseNo || '',
+          judmnAdjuDt: item.선고일자 || item.judmnAdjuDt || '',
+          courtName: item.법원명 || item.courtName || '',
+          judmnAdjuDeclCd: item.판결유형 || item.judmnAdjuDeclCd || '판결',
+          abstrct: item.판시사항 || item.abstrct || '',
+          refrnc: item.참조조문 || item.refrnc || '',
+          judmnAdjuGbnCd: item.심급구분 || item.judmnAdjuGbnCd || '',
+          ...item
+        }));
+      }
+    }
+    
+    console.log('인식되지 않는 응답 구조:', data);
+    return [];
+    
   } catch (error) {
     console.error('JSON 파싱 오류:', error);
+    console.log('파싱 실패한 원본 데이터:', jsonString);
     throw new Error('JSON 데이터를 파싱하는 중 오류가 발생했습니다.');
   }
 };
@@ -117,6 +158,6 @@ export const parseAPIResponse = (
   if (contentType === 'xml') {
     return parseLawXML(responseText);
   } else {
-    return parsePrecedentJSON(responseText);
+    return parseLawSearchJSON(responseText);
   }
 };

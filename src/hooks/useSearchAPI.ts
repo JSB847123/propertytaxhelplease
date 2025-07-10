@@ -28,9 +28,8 @@ export const useSearchAPI = (): UseSearchAPIResult => {
       
       const response = await searchLawOrPrecedent(params);
       
-      // 응답 타입 결정
-      const contentType = params.target === 'law' ? 'xml' : 'json';
-      const parsedData = parseAPIResponse(response, contentType);
+      // 법제처 API는 항상 JSON으로 응답 받도록 설정됨
+      const parsedData = parseAPIResponse(response, 'json');
       
       console.log('파싱된 데이터:', parsedData);
       setData(parsedData);
