@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, FileText, AlertCircle, Settings } from "lucide-react";
+import { Search, FileText, AlertCircle } from "lucide-react";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 interface SimplePrecedentSearchProps {
