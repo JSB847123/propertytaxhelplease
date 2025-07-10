@@ -56,7 +56,7 @@ export const SearchForm = ({ onSearch, isLoading = false, defaultValues }: Searc
   const [formData, setFormData] = useState<SearchFormData>({
     query: defaultValues?.query || "",
     searchType: defaultValues?.searchType || "law",
-    searchScope: defaultValues?.searchScope || "1",
+    searchScope: defaultValues?.searchScope || "0",
     dateFrom: defaultValues?.dateFrom,
     dateTo: defaultValues?.dateTo,
     court: defaultValues?.court || "all",

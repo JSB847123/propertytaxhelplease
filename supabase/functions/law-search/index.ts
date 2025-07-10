@@ -25,7 +25,7 @@ serve(async (req) => {
     const target = searchParams.get('target') || 'law'; // law, prec, lawview, precview
     const page = searchParams.get('page') || '1';
     const display = Math.min(parseInt(searchParams.get('display') || '20'), 100).toString();
-    const search = searchParams.get('search') || '1'; // 1:제목, 2:본문, 0:전체
+    const search = searchParams.get('search') || '0'; // 0:전체, 1:제목, 2:본문
     
     // 고급 검색 파라미터
     const sort = searchParams.get('sort') || 'date'; // date, score
@@ -90,6 +90,7 @@ serve(async (req) => {
 
     const responseText = await response.text();
     console.log('API 응답 수신, 길이:', responseText.length);
+    console.log('API 응답 내용 (처음 1000자):', responseText.substring(0, 1000));
 
     let jsonData: any;
 
