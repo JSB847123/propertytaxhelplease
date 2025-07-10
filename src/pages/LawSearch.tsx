@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft } from "lucide-react";
 import { SearchForm, type SearchFormData } from "@/components/law/SearchForm";
 import { SearchResults } from "@/components/law/SearchResults";
+import { LawTextSearch } from "@/components/law/LawTextSearch";
 import type { LawData } from "@/components/law/LawCard";
 import type { PrecedentData } from "@/components/law/PrecedentCard";
 
@@ -169,36 +171,49 @@ const LawSearch = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Search Form */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-6">
-              <SearchForm 
-                onSearch={handleSearch}
-                isLoading={isLoading}
-                defaultValues={searchData || undefined}
-              />
-            </div>
-          </div>
+        <Tabs defaultValue="search" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="search">법령/판례 검색</TabsTrigger>
+            <TabsTrigger value="text">법령 원문 검색</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="search" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Search Form */}
+              <div className="lg:col-span-1">
+                <div className="sticky top-6">
+                  <SearchForm 
+                    onSearch={handleSearch}
+                    isLoading={isLoading}
+                    defaultValues={searchData || undefined}
+                  />
+                </div>
+              </div>
 
-          {/* Search Results */}
-          <div className="lg:col-span-3">
-            <SearchResults
-              data={parsedResults}
-              isLoading={isLoading}
-              error={error}
-              searchType={searchData?.searchType || "law"}
-              searchTerm={searchData?.query}
-              currentPage={currentPage}
-              hasNextPage={parsedResults ? parsedResults.length >= (searchData?.resultCount || 20) : false}
-              onLoadMore={handleLoadMore}
-              onItemClick={handleItemClick}
-              onRetry={refetch}
-              onClearSearch={handleClearSearch}
-              onSuggestionClick={handleSuggestionClick}
-            />
-          </div>
-        </div>
+              {/* Search Results */}
+              <div className="lg:col-span-3">
+                <SearchResults
+                  data={parsedResults}
+                  isLoading={isLoading}
+                  error={error}
+                  searchType={searchData?.searchType || "law"}
+                  searchTerm={searchData?.query}
+                  currentPage={currentPage}
+                  hasNextPage={parsedResults ? parsedResults.length >= (searchData?.resultCount || 20) : false}
+                  onLoadMore={handleLoadMore}
+                  onItemClick={handleItemClick}
+                  onRetry={refetch}
+                  onClearSearch={handleClearSearch}
+                  onSuggestionClick={handleSuggestionClick}
+                />
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="text" className="mt-6">
+            <LawTextSearch />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
