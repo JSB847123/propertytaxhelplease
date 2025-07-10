@@ -13,7 +13,8 @@ import { useSearchHistory } from "@/hooks/useSearchHistory";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorDisplay } from "./ErrorDisplay";
 import { PrecedentList } from "./PrecedentList";
-import type { PrecedentData } from "@/lib/xmlParser";
+import { LawList } from "./LawList";
+import type { PrecedentData, LawData } from "@/lib/xmlParser";
 
 interface SearchSectionProps {
   onSearch?: (term: string, filters: string[]) => void;
@@ -475,16 +476,12 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
       />
     )}
 
-    {/* 법령 검색 결과는 기존 방식 유지 */}
+    {/* 법령 검색 결과 */}
     {!isLoading && !error && data && searchType === 'law' && (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-muted-foreground">
-            <p>법령 검색 결과: {data.length}건</p>
-            <p className="text-sm mt-2">법령 검색 결과 표시 컴포넌트를 구현해주세요.</p>
-          </div>
-        </CardContent>
-      </Card>
+      <LawList 
+        laws={data as LawData[]}
+        searchTerm={searchTerm}
+      />
     )}
   </div>
   );
