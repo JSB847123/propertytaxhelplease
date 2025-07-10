@@ -15,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('법제처 API 검색 요청 시작');
+    console.log('법제처 API 검색 요청 시작 - 전체 URL:', req.url);
     
     const url = new URL(req.url);
     const searchParams = url.searchParams;
