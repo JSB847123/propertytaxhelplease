@@ -45,35 +45,17 @@ serve(async (req) => {
       );
     }
 
-    // API 엔드포인트 결정
-    let apiUrl: string;
-    let apiParams: URLSearchParams;
-    
-    if (target === 'prec' || target === 'precview') {
-      // 판례 API (JSON 응답)
-      apiUrl = 'http://open.law.go.kr/LSO/openApi/precedentList.do';
-      apiParams = new URLSearchParams({
-        OC: lawOC,
-        target: target,
-        type: 'JSON',
-        query: query,
-        display: display,
-        page: page,
-        search: search
-      });
-    } else {
-      // 법령 API (XML 응답)
-      apiUrl = 'http://www.law.go.kr/DRF/lawService.do';
-      apiParams = new URLSearchParams({
-        OC: lawOC,
-        target: target,
-        type: target === 'lawview' ? 'XML' : 'JSON', // lawview는 XML, law는 JSON으로 요청
-        query: query,
-        display: display,
-        page: page,
-        search: search
-      });
-    }
+    // 새로운 법제처 API 사용
+    const apiUrl = 'https://open.law.go.kr/LSO/openApi/list_sample.json';
+    const apiParams = new URLSearchParams({
+      OC: 'bahnntf',
+      target: target === 'prec' ? 'prec' : 'law',
+      type: 'JSON',
+      query: query,
+      display: display,
+      page: page,
+      search: search
+    });
 
     console.log('API 호출 URL:', `${apiUrl}?${apiParams.toString()}`);
 
