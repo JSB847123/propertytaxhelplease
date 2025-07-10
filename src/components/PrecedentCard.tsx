@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, FileText, Scale, Building2, Bookmark, BookmarkCheck, Tag, StickyNote } from "lucide-react";
+import { Calendar, FileText, Scale, Building2, Bookmark, BookmarkCheck, Tag, StickyNote, Eye } from "lucide-react";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useToast } from "@/hooks/use-toast";
+import { PrecedentDetail } from "./PrecedentDetail";
 import type { PrecedentData } from "@/lib/xmlParser";
 
 interface PrecedentCardProps extends PrecedentData {
@@ -200,6 +201,20 @@ export const PrecedentCard = ({
             </div>
           </div>
         )}
+
+        {/* 상세보기 버튼 */}
+        <div className="pt-3 border-t flex justify-end">
+          <PrecedentDetail 
+            precedentId={caseNumber} 
+            precedentName={caseTitle}
+            triggerText="전체 내용 보기"
+          >
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              전체 내용 보기
+            </Button>
+          </PrecedentDetail>
+        </div>
       </CardContent>
     </Card>
   );

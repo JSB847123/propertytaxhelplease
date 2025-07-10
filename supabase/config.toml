@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.advanced-precedent-search]
 verify_jwt = false
+
+[functions.precedent-detail]
+verify_jwt = false
