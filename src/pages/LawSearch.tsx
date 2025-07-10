@@ -85,15 +85,16 @@ const LawSearch = () => {
   };
 
   const handleItemClick = (item: LawData | PrecedentData) => {
-    const id = searchData?.searchType === 'law'
-      ? (item as LawData).법령ID 
-      : (item as PrecedentData).판례정보일련번호;
-    const target = searchData?.searchType === 'law' ? 'lawview' : 'precview';
-    
-    if (id) {
-      const url = `/law-detail?id=${encodeURIComponent(id)}&target=${target}`;
-      window.open(url, '_blank');
+    // 판례 검색의 경우는 더이상 새 창으로 이동하지 않고 PrecedentDetail 컴포넌트를 사용합니다
+    // 법령 검색의 경우만 새 창으로 이동합니다
+    if (searchData?.searchType === 'law') {
+      const id = (item as LawData).법령ID;
+      if (id) {
+        const url = `/law-detail?id=${encodeURIComponent(id)}&target=lawview`;
+        window.open(url, '_blank');
+      }
     }
+    // 판례의 경우는 SearchResults 컴포넌트에서 PrecedentDetail이 처리됩니다
   };
 
   const handleClearSearch = () => {

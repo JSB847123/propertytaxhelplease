@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Gavel, FileText, ExternalLink, Bookmark, BookmarkCheck } from "lucide-react";
+import { Calendar, Gavel, FileText, ExternalLink, Bookmark, BookmarkCheck, Eye } from "lucide-react";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { PrecedentDetail } from "@/components/PrecedentDetail";
 
 export interface PrecedentData {
   사건명?: string;
@@ -197,6 +198,27 @@ export const PrecedentCard = ({
         {data.판례정보일련번호 && (
           <div className="text-xs text-muted-foreground border-t pt-2 mt-3">
             판례정보일련번호: {data.판례정보일련번호}
+          </div>
+        )}
+
+        {/* 상세보기 버튼 */}
+        {data.판례정보일련번호 && (
+          <div className="pt-3 border-t flex justify-end">
+            <PrecedentDetail 
+              precedentId={data.판례정보일련번호} 
+              precedentName={data.사건명}
+              triggerText="전체 내용 보기"
+            >
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Eye className="h-4 w-4" />
+                전체 내용 보기
+              </Button>
+            </PrecedentDetail>
           </div>
         )}
       </CardContent>
