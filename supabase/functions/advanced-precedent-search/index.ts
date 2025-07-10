@@ -89,6 +89,8 @@ serve(async (req) => {
     console.log('API 응답 내용 (처음 500자):', responseText.substring(0, 500));
 
     let processedData: any;
+    let totalCount = 0;
+    let extractedInfo: any = {};
 
     // 응답 타입에 따른 처리
     if (type === 'html') {
@@ -97,20 +99,66 @@ serve(async (req) => {
         htmlContent: responseText,
         contentType: 'html'
       };
+      
+      // HTML에서 totalCnt 정보 추출 시도 (정규식 사용)
+      const totalCntMatch = responseText.match(/<totalCnt[^>]*>(\d+)<\/totalCnt>/);
+      if (totalCntMatch) {
+        totalCount = parseInt(totalCntMatch[1]);
+      }
+      
     } else {
       // JSON/XML 응답인 경우 파싱
       try {
         if (responseText.trim().startsWith('<')) {
-          // XML 응답인 경우
-          console.log('XML 응답 감지');
+          // XML 응답인 경우 - totalCnt 정보 추출
+          console.log('XML 응답 감지 - totalCnt 추출 중...');
+          
+          const totalCntMatch = responseText.match(/<totalCnt[^>]*>(\d+)<\/totalCnt>/);
+          if (totalCntMatch) {
+            totalCount = parseInt(totalCntMatch[1]);
+            console.log('추출된 totalCnt:', totalCount);
+          }
+          
+          // 기타 유용한 정보 추출
+          const resultMsgMatch = responseText.match(/<resultMsg[^>]*>([^<]+)<\/resultMsg>/);
+          const keywordMatch = responseText.match(/<키워드[^>]*>([^<]+)<\/키워드>/);
+          
+          extractedInfo = {
+            totalCount: totalCount,
+            resultMsg: resultMsgMatch ? resultMsgMatch[1] : null,
+            keyword: keywordMatch ? keywordMatch[1] : keyword,
+            searchType: 'precedent'
+          };
+          
           processedData = {
             xmlContent: responseText,
-            contentType: 'xml'
+            contentType: 'xml',
+            extractedInfo: extractedInfo
           };
         } else {
           // JSON 응답인 경우
           console.log('JSON 응답 파싱 중...');
-          processedData = JSON.parse(responseText);
+          const jsonData = JSON.parse(responseText);
+          
+          // JSON에서 totalCnt 추출 시도
+          if (jsonData.PrecSearch?.totalCnt) {
+            totalCount = parseInt(jsonData.PrecSearch.totalCnt);
+          } else if (jsonData.totalCnt) {
+            totalCount = parseInt(jsonData.totalCnt);
+          }
+          
+          extractedInfo = {
+            totalCount: totalCount,
+            resultMsg: jsonData.PrecSearch?.resultMsg || jsonData.resultMsg,
+            keyword: jsonData.PrecSearch?.키워드 || jsonData.키워드 || keyword,
+            searchType: 'precedent'
+          };
+          
+          processedData = {
+            ...jsonData,
+            contentType: 'json',
+            extractedInfo: extractedInfo
+          };
         }
       } catch (parseError) {
         console.error('응답 파싱 오류:', parseError);
@@ -137,6 +185,8 @@ serve(async (req) => {
           display: parseInt(display),
           page: parseInt(page),
           prncYdRange: `${prncYdStart}~${prncYdEnd}`,
+          totalCount: totalCount,
+          extractedInfo: extractedInfo,
           timestamp: new Date().toISOString(),
           searchDescription: search === '2' ? '판시요지와 판시내용' : 
                            search === '1' ? '제목' : '전체'

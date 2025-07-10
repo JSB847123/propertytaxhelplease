@@ -34,6 +34,13 @@ interface SearchResponse {
     search: string;
     display: number;
     page: number;
+    totalCount: number;
+    extractedInfo: {
+      totalCount: number;
+      resultMsg: string;
+      keyword: string;
+      searchType: string;
+    };
     prncYdRange: string;
     timestamp: string;
     searchDescription: string;
@@ -275,8 +282,13 @@ export const AdvancedPrecedentSearch = ({ className }: AdvancedPrecedentSearchPr
       {searchResult && !isLoading && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">
+            <CardTitle className="text-lg flex items-center justify-between">
               검색 결과
+              {searchResult.meta.totalCount !== undefined && (
+                <Badge variant="secondary" className="text-lg px-3 py-1">
+                  총 {searchResult.meta.totalCount.toLocaleString()}건
+                </Badge>
+              )}
             </CardTitle>
             <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
               <span>키워드: {searchResult.meta.keyword}</span>
@@ -284,9 +296,29 @@ export const AdvancedPrecedentSearch = ({ className }: AdvancedPrecedentSearchPr
               <span>{searchResult.meta.searchDescription}</span>
               <span>•</span>
               <span>{searchResult.meta.prncYdRange}</span>
+              {searchResult.meta.extractedInfo?.resultMsg && (
+                <>
+                  <span>•</span>
+                  <span>상태: {searchResult.meta.extractedInfo.resultMsg}</span>
+                </>
+              )}
             </div>
           </CardHeader>
           <CardContent>
+            {/* totalCount 정보를 강조 표시 */}
+            {searchResult.meta.totalCount !== undefined && (
+              <div className="mb-4 p-3 bg-primary/10 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  <span className="font-medium">
+                    총 {searchResult.meta.totalCount.toLocaleString()}건의 판례가 검색되었습니다.
+                  </span>
+                </div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  현재 페이지: {searchResult.meta.page} / 표시 개수: {searchResult.meta.display}개
+                </div>
+              </div>
+            )}
             {searchResult.data.contentType === 'html' ? (
               <div className="space-y-4">
                 <div className="text-sm text-muted-foreground">
