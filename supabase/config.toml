@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.law-search]
 verify_jwt = false
+
+[functions.advanced-precedent-search]
+verify_jwt = false
