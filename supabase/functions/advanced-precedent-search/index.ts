@@ -100,10 +100,13 @@ serve(async (req) => {
         contentType: 'html'
       };
       
-      // HTML에서 totalCnt 정보 추출 시도 (정규식 사용)
-      const totalCntMatch = responseText.match(/<totalCnt[^>]*>(\d+)<\/totalCnt>/);
-      if (totalCntMatch) {
-        totalCount = parseInt(totalCntMatch[1]);
+      // HTML에서 검색 결과 건수 추출 (실제 HTML 구조에 맞게 수정)
+      const totalCountMatch = responseText.match(/총<strong>(\d+)<\/strong>건/);
+      if (totalCountMatch) {
+        totalCount = parseInt(totalCountMatch[1]);
+        console.log('HTML에서 추출된 totalCount:', totalCount);
+      } else {
+        console.log('HTML에서 totalCount를 찾을 수 없습니다');
       }
       
     } else {
