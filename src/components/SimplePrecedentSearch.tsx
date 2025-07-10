@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, FileText, AlertCircle, Calendar } from "lucide-react";
+import { Search, FileText, AlertCircle, Settings } from "lucide-react";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 interface SimplePrecedentSearchProps {
@@ -35,16 +36,18 @@ export const SimplePrecedentSearch = ({ className }: SimplePrecedentSearchProps)
   const [isLoading, setIsLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // 커스터마이징 가능한 검색 파라미터
+  const [type, setType] = useState("html");
+  const [display, setDisplay] = useState("100");
+  const [prncYdStart, setPrncYdStart] = useState("20000101");
+  const [prncYdEnd, setPrncYdEnd] = useState("20231231");
+  const [searchScope, setSearchScope] = useState("2");
 
-  // 고정된 검색 파라미터
+  // 고정 파라미터 (API 호출용)
   const fixedParams = {
-    id: "bahnntf",           // 고정 ID
+    id: "bahnntf",           // API 호출을 위한 고정 ID
     target: "prec",          // 판례 검색
-    type: "html",            // HTML 형식
-    display: "100",          // 한 번에 100개
-    prncYdStart: "20000101", // 2000년부터
-    prncYdEnd: "20231231",   // 2023년까지
-    search: "2",             // 판시요지와 판시내용
     page: "1"
   };
 
@@ -64,6 +67,11 @@ export const SimplePrecedentSearch = ({ className }: SimplePrecedentSearchProps)
       // URLSearchParams로 파라미터 구성
       const paramObject: Record<string, string> = {
         keyword: keyword.trim(),
+        type: type,
+        display: display,
+        prncYdStart: prncYdStart,
+        prncYdEnd: prncYdEnd,
+        search: searchScope,
         ...fixedParams
       };
       
@@ -100,16 +108,25 @@ export const SimplePrecedentSearch = ({ className }: SimplePrecedentSearchProps)
     }
   };
 
+  const getScopeText = (scope: string) => {
+    switch (scope) {
+      case "1": return "제목";
+      case "2": return "판시요지와 판시내용";
+      case "3": return "전체";
+      default: return "판시요지와 판시내용";
+    }
+  };
+
   return (
     <div className={`space-y-6 ${className}`}>
       <Card>
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
             <FileText className="h-6 w-6" />
-            간편 판례 검색
+            판례 검색
           </CardTitle>
           <div className="text-sm text-muted-foreground">
-            고정 설정: HTML 형식, 100개씩, 2000-2023년, 판시요지와 판시내용
+            검색 조건을 설정하여 판례를 검색하세요
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -133,23 +150,77 @@ export const SimplePrecedentSearch = ({ className }: SimplePrecedentSearchProps)
             </Button>
           </div>
 
-          {/* 고정 설정 표시 */}
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">ID: {fixedParams.id}</Badge>
-            <Badge variant="secondary">형식: {fixedParams.type.toUpperCase()}</Badge>
-            <Badge variant="secondary">개수: {fixedParams.display}개</Badge>
-            <Badge variant="secondary">
-              <Calendar className="h-3 w-3 mr-1" />
-              {fixedParams.prncYdStart}~{fixedParams.prncYdEnd}
-            </Badge>
-            <Badge variant="secondary">범위: 판시요지와 판시내용</Badge>
+          {/* 검색 조건 설정 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">형식</label>
+              <Select value={type} onValueChange={setType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="html">HTML</SelectItem>
+                  <SelectItem value="xml">XML</SelectItem>
+                  <SelectItem value="json">JSON</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">개수</label>
+              <Select value={display} onValueChange={setDisplay}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10개</SelectItem>
+                  <SelectItem value="50">50개</SelectItem>
+                  <SelectItem value="100">100개</SelectItem>
+                  <SelectItem value="200">200개</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">시작일</label>
+              <Input
+                value={prncYdStart}
+                onChange={(e) => setPrncYdStart(e.target.value)}
+                placeholder="YYYYMMDD"
+                maxLength={8}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">종료일</label>
+              <Input
+                value={prncYdEnd}
+                onChange={(e) => setPrncYdEnd(e.target.value)}
+                placeholder="YYYYMMDD"
+                maxLength={8}
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-medium">검색 범위</label>
+              <Select value={searchScope} onValueChange={setSearchScope}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">제목</SelectItem>
+                  <SelectItem value="2">판시요지와 판시내용</SelectItem>
+                  <SelectItem value="3">전체</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* URL 미리보기 */}
           {keyword.trim() && (
             <div className="p-3 bg-muted/30 rounded-lg">
               <div className="text-xs font-mono text-muted-foreground break-all">
-                http://www.law.go.kr/DRF/lawSearch.do?OC={fixedParams.id}&target={fixedParams.target}&type={fixedParams.type}&query={encodeURIComponent(keyword)}&display={fixedParams.display}&prncYd={fixedParams.prncYdStart}~{fixedParams.prncYdEnd}&search={fixedParams.search}
+                http://www.law.go.kr/DRF/lawSearch.do?OC={fixedParams.id}&target={fixedParams.target}&type={type}&query={encodeURIComponent(keyword)}&display={display}&prncYd={prncYdStart}~{prncYdEnd}&search={searchScope}
               </div>
             </div>
           )}
@@ -205,11 +276,11 @@ export const SimplePrecedentSearch = ({ className }: SimplePrecedentSearchProps)
                   </span>
                 </div>
                 <div className="text-sm text-muted-foreground mt-2">
-                  • 검색 범위: 판시요지와 판시내용
+                  • 검색 범위: {getScopeText(searchScope)}
                   <br />
-                  • 기간: 2000년 1월 1일 ~ 2023년 12월 31일
+                  • 기간: {prncYdStart.slice(0,4)}년 {prncYdStart.slice(4,6)}월 {prncYdStart.slice(6,8)}일 ~ {prncYdEnd.slice(0,4)}년 {prncYdEnd.slice(4,6)}월 {prncYdEnd.slice(6,8)}일
                   <br />
-                  • 결과 형식: HTML (100개씩 표시)
+                  • 결과 형식: {type.toUpperCase()} ({display}개씩 표시)
                 </div>
               </div>
             )}
