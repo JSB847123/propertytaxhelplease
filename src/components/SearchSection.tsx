@@ -82,8 +82,12 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
   const [showFilters, setShowFilters] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   
-  // 검색 범위 상태 (법령만)
+  // 새로운 상태들
+  const [searchType, setSearchType] = useState<"law" | "precedent">("law");
   const [searchScope, setSearchScope] = useState("all");
+  const [courtType, setCourtType] = useState("all");
+  const [sortOption, setSortOption] = useState("relevance");
+  const [resultCountOption, setResultCountOption] = useState("20");
   
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -130,7 +134,7 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     );
     
     // 최근 검색어 매치  
-    const recentSearches = getRecentSearches('law', 3)
+    const recentSearches = getRecentSearches(searchType === 'precedent' ? 'prec' : 'law', 3)
       .filter(recent => recent.query.toLowerCase().includes(searchTerm.toLowerCase()));
     
     // 중복 제거 후 상위 8개 반환 (최근 검색어 우선)
@@ -147,14 +151,19 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     });
     
     return uniqueMatches.slice(0, 8);
-  }, [searchTerm, getRecentSearches]);
+  }, [searchTerm, searchType, getRecentSearches]);
 
   const handleAPISearch = async (query: string) => {
     if (!query.trim()) return;
 
     const searchParams = {
-      target: 'law' as const,
-      query: query.trim()
+      target: searchType === 'precedent' ? 'prec' as const : 'law' as const,
+      query: query.trim(),
+      ...(searchType === 'precedent' && {
+        search: searchScope === 'title' ? '1' : searchScope === 'content' ? '2' : '0',
+        display: parseInt(resultCountOption),
+        page: 1
+      })
     };
 
     const result = await search(searchParams);
@@ -163,7 +172,7 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     if (result) {
       addSearchHistory(
         query.trim(), 
-        'law',
+        searchType === 'precedent' ? 'prec' : 'law',
         data ? data.length : undefined
       );
     }
@@ -237,28 +246,103 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
           </CardTitle>
         </CardHeader>
       <CardContent className="space-y-4">
-        {/* 검색 범위 선택 (법령만) */}
+        {/* 검색 타입 선택 */}
         <div className="flex gap-2">
+          <Select value={searchType} onValueChange={(value: "law" | "precedent") => {
+            setSearchType(value);
+            setSearchScope("all"); // 검색 타입 변경 시 범위 초기화
+          }}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="law">법령</SelectItem>
+              <SelectItem value="precedent">판례</SelectItem>
+            </SelectContent>
+          </Select>
+          
           <Select value={searchScope} onValueChange={setSearchScope}>
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {SEARCH_SCOPE_OPTIONS.law.map((option) => (
+              {SEARCH_SCOPE_OPTIONS[searchType].map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          
+          <Button 
+            variant="outline" 
+            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+            className="flex items-center gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            고급옵션
+          </Button>
         </div>
+
+        {/* 고급 옵션 (판례 검색용) */}
+        {showAdvancedOptions && searchType === "precedent" && (
+          <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+            <div>
+              <label className="text-sm font-medium mb-2 block">법원 종류</label>
+              <Select value={courtType} onValueChange={setCourtType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {COURT_TYPES.map((court) => (
+                    <SelectItem key={court.value} value={court.value}>
+                      {court.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block">정렬 옵션</label>
+              <Select value={sortOption} onValueChange={setSortOption}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SORT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block">결과 개수</label>
+              <Select value={resultCountOption} onValueChange={setResultCountOption}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RESULT_COUNT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
 
         <div className="relative">
           <div className="flex gap-2">
             <div className="flex-1 relative">
               <Input
                 ref={inputRef}
-                placeholder="키워드, 조문명, 조문내용으로 검색..."
+                placeholder={searchType === "law" ? "키워드, 조문명, 조문내용으로 검색..." : "판례명, 본문으로 검색..."}
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -283,7 +367,7 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
                 >
                   {suggestions.map((suggestion, index) => {
                     const suggestionText = typeof suggestion === 'string' ? suggestion : suggestion.query;
-                    const recentSearches = getRecentSearches('law', 3);
+                    const recentSearches = getRecentSearches(searchType === 'precedent' ? 'prec' : 'law', 3);
                     const isRecentSearch = recentSearches.some(recent => recent.query === suggestionText);
                     return (
                       <div
@@ -371,8 +455,8 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     {/* 로딩 상태 */}
     {isLoading && (
       <LoadingSpinner 
-        type="law" 
-        message="법령을 검색하고 있습니다..."
+        type={searchType} 
+        message={searchType === 'law' ? '법령을 검색하고 있습니다...' : '판례를 검색하고 있습니다...'}
       />
     )}
 
@@ -385,7 +469,14 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
     )}
 
     {/* 검색 결과 */}
-    {!isLoading && !error && data && (
+    {!isLoading && !error && data && searchType === 'precedent' && (
+      <PrecedentList 
+        precedents={data as import('@/lib/xmlParser').PrecedentData[]}
+        searchTerm={searchTerm}
+      />
+    )}
+
+    {!isLoading && !error && data && searchType === 'law' && (
       <LawList 
         laws={data as LawData[]}
         searchTerm={searchTerm}
