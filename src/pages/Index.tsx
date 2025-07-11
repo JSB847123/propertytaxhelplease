@@ -7,7 +7,7 @@ import { FavoriteArticles } from "@/components/FavoriteArticles";
 import { FrequentSites } from "@/components/FrequentSites";
 import { MemoSection } from "@/components/MemoSection";
 import { SearchSection } from "@/components/SearchSection";
-import { SimplePrecedentSearch } from "@/components/SimplePrecedentSearch";
+
 import { BasicLawLinks } from "@/components/BasicLawLinks";
 import { FAQ } from "@/components/FAQ";
 import { UtilityBar } from "@/components/UtilityBar";
@@ -58,7 +58,6 @@ const Index = () => {
               setSearchTerm={setSearchTerm}
               resultCount={searchResultCount}
             />
-            <SimplePrecedentSearch />
             <LawArticleList 
               onArticleClick={setSelectedArticle}
               searchTerm={searchTerm}
