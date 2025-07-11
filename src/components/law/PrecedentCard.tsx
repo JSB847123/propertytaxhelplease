@@ -210,10 +210,9 @@ export const PrecedentCard = ({
               triggerText="전체 내용 보기"
             >
               <Button 
-                variant="outline" 
+                variant="default" 
                 size="sm" 
-                className="flex items-center gap-2"
-                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-2 bg-primary hover:bg-primary/90"
               >
                 <Eye className="h-4 w-4" />
                 전체 내용 보기
