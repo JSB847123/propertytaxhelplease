@@ -36,12 +36,20 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-foreground">재산세 법령 포털</h1>
-            <Link to="/law-search">
-              <Button className="flex items-center gap-2">
-                <Search className="h-4 w-4" />
-                법령/판례 검색
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link to="/law-search">
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Search className="h-4 w-4" />
+                  기존 검색
+                </Button>
+              </Link>
+              <Link to="/precedent-search">
+                <Button className="flex items-center gap-2">
+                  <Search className="h-4 w-4" />
+                  새로운 판례 검색
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>

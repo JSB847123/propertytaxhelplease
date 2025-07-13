@@ -70,6 +70,7 @@ const PrecedentDetail: React.FC<PrecedentDetailProps> = ({
       const knownMappings: { [key: string]: string } = {
         '2005두2261': '68257',
         '2014다51015': '228541',
+        '2018두42559': '204337',
         '2020다296604': '606191',
         '2024다317332': '606173',
         '2023다283401': '605333',
@@ -182,6 +183,7 @@ const PrecedentDetail: React.FC<PrecedentDetailProps> = ({
       const knownMappings: { [key: string]: string } = {
         '2005두2261': '68257',
         '2014다51015': '228541',
+        '2018두42559': '204337',
         '2020다296604': '606191',
         '2024다317332': '606173',
         '2023다283401': '605333',
