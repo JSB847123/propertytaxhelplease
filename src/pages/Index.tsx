@@ -7,13 +7,12 @@ import { FavoriteArticles } from "@/components/FavoriteArticles";
 import { FrequentSites } from "@/components/FrequentSites";
 import { MemoSection } from "@/components/MemoSection";
 import { SearchSection } from "@/components/SearchSection";
-
 import { BasicLawLinks } from "@/components/BasicLawLinks";
 import { FAQ } from "@/components/FAQ";
 import { UtilityBar } from "@/components/UtilityBar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, Calculator, ExternalLink } from "lucide-react";
 
 const Index = () => {
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
@@ -25,6 +24,10 @@ const Index = () => {
     setSearchTerm(term);
     setSearchFilters(filters);
   }, []);
+
+  const handleCalculatorClick = () => {
+    window.open('https://empty-page-seed.lovable.app/', '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -81,6 +84,40 @@ const Index = () => {
             <FrequentSites />
             <FAQ />
             <MemoSection />
+            
+            {/* 재산세 계산기 */}
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calculator className="h-5 w-5 text-blue-600" />
+                  재산세(주택) 계산기
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    주택 재산세를 간편하게 계산해보세요.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                      개발중
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      베타 버전 서비스
+                    </span>
+                  </div>
+                  <Button 
+                    onClick={handleCalculatorClick}
+                    className="w-full flex items-center gap-2"
+                    variant="outline"
+                  >
+                    <Calculator className="h-4 w-4" />
+                    계산기 사용하기
+                    <ExternalLink className="h-3 w-3" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

@@ -20,6 +20,28 @@ export const CaseDetail: React.FC<CaseDetailProps> = ({ caseItem, trigger }) => 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // HTML 태그를 제거하고 br 태그를 줄바꿈으로 변환하는 함수
+  const cleanHtmlText = (text: string): string => {
+    if (!text) return '';
+    
+    return text
+      // br 태그를 줄바꿈으로 변환
+      .replace(/<br\s*\/?>/gi, '\n')
+      // 다른 HTML 태그 제거
+      .replace(/<[^>]*>/g, '')
+      // HTML 엔티티 디코딩
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      // 연속된 공백 정리
+      .replace(/\s+/g, ' ')
+      // 앞뒤 공백 제거
+      .trim();
+  };
+
   const fetchCaseDetail = async () => {
     if (!caseItem.판례정보일련번호) {
       setError('판례일련번호가 없습니다.');
@@ -52,31 +74,18 @@ export const CaseDetail: React.FC<CaseDetailProps> = ({ caseItem, trigger }) => 
   };
 
   const handleRetry = () => {
-    setDetailData(null);
     setError(null);
     fetchCaseDetail();
   };
 
   const handleExternalLink = () => {
-    const precedentId = caseItem.판례정보일련번호;
-    const caseNumber = caseItem.사건번호;
-    
-    let url = '';
-    if (precedentId && /^\d+$/.test(precedentId)) {
-      url = `https://www.law.go.kr/precSc.do?precSeq=${precedentId}`;
-    } else if (caseNumber) {
-      url = `https://www.law.go.kr/precSc.do?menuId=1&subMenuId=25&tabMenuId=117&query=${encodeURIComponent(caseNumber)}`;
-    } else {
-      url = 'https://www.law.go.kr/precSc.do';
-    }
-    
-    window.open(url, '_blank', 'noopener,noreferrer');
+    const url = `https://www.law.go.kr/LSW/precSc.do?menuId=1&subMenuId=25&tabMenuId=106&eventGubun=060101&query=${encodeURIComponent(caseItem.사건번호 || '')}`;
+    window.open(url, '_blank');
   };
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     
-    // YYYYMMDD 형태를 YYYY-MM-DD로 변환
     if (dateString.length === 8) {
       return `${dateString.slice(0, 4)}-${dateString.slice(4, 6)}-${dateString.slice(6, 8)}`;
     }
@@ -149,14 +158,15 @@ export const CaseDetail: React.FC<CaseDetailProps> = ({ caseItem, trigger }) => 
                   <div>
                     <strong>오류:</strong> {error}
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={handleRetry}>
-                      <RefreshCw className="w-4 h-4 mr-2" />
+                  <div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleRetry}
+                      className="mr-2"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-1" />
                       다시 시도
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={handleExternalLink}>
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      법제처에서 보기
                     </Button>
                   </div>
                 </div>
@@ -175,7 +185,7 @@ export const CaseDetail: React.FC<CaseDetailProps> = ({ caseItem, trigger }) => 
                       <div>
                         <h4 className="font-semibold text-sm text-gray-700 mb-2">📋 판시사항</h4>
                         <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded whitespace-pre-wrap">
-                          {detailData.판시사항}
+                          {cleanHtmlText(detailData.판시사항)}
                         </div>
                       </div>
                     )}
@@ -185,7 +195,7 @@ export const CaseDetail: React.FC<CaseDetailProps> = ({ caseItem, trigger }) => 
                       <div>
                         <h4 className="font-semibold text-sm text-gray-700 mb-2">⚖️ 판결요지</h4>
                         <div className="text-sm text-gray-600 bg-green-50 p-3 rounded whitespace-pre-wrap">
-                          {detailData.판결요지}
+                          {cleanHtmlText(detailData.판결요지)}
                         </div>
                       </div>
                     )}
@@ -195,7 +205,7 @@ export const CaseDetail: React.FC<CaseDetailProps> = ({ caseItem, trigger }) => 
                       <div>
                         <h4 className="font-semibold text-sm text-gray-700 mb-2">📖 참조조문</h4>
                         <div className="text-sm text-gray-600 bg-yellow-50 p-3 rounded whitespace-pre-wrap">
-                          {detailData.참조조문}
+                          {cleanHtmlText(detailData.참조조문)}
                         </div>
                       </div>
                     )}
@@ -205,7 +215,7 @@ export const CaseDetail: React.FC<CaseDetailProps> = ({ caseItem, trigger }) => 
                       <div>
                         <h4 className="font-semibold text-sm text-gray-700 mb-2">🔗 참조판례</h4>
                         <div className="text-sm text-gray-600 bg-purple-50 p-3 rounded whitespace-pre-wrap">
-                          {detailData.참조판례}
+                          {cleanHtmlText(detailData.참조판례)}
                         </div>
                       </div>
                     )}
@@ -215,7 +225,7 @@ export const CaseDetail: React.FC<CaseDetailProps> = ({ caseItem, trigger }) => 
                       <div>
                         <h4 className="font-semibold text-sm text-gray-700 mb-3">📄 판례 전문</h4>
                         <div className="text-sm text-gray-700 bg-white border p-4 rounded max-h-96 overflow-y-auto whitespace-pre-wrap">
-                          {detailData.판례내용}
+                          {cleanHtmlText(detailData.판례내용)}
                         </div>
                       </div>
                     )}
