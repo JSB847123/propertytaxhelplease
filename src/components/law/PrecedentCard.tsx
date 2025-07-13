@@ -9,12 +9,54 @@ interface PrecedentCardProps {
 }
 
 export const PrecedentCard = ({ data }: PrecedentCardProps) => {
-  // 판례 정보 추출
-  const precedentId = data.판례정보일련번호 || data.사건번호 || '';
+  // 판례 정보 추출 및 디버깅
+  console.log('PrecedentCard 데이터:', data);
+  console.log('원본 데이터 키들:', Object.keys(data));
+  
+  // 판례일련번호 추출 - 다양한 경로에서 시도
+  let precedentId = '';
+  
+  // 1순위: 원본데이터에서 판례일련번호
+  if (data.원본데이터?.판례일련번호) {
+    precedentId = data.원본데이터.판례일련번호;
+    console.log('원본데이터에서 판례일련번호 추출:', precedentId);
+  }
+  // 2순위: 직접 필드에서 판례정보일련번호
+  else if (data.판례정보일련번호) {
+    precedentId = data.판례정보일련번호;
+    console.log('판례정보일련번호 필드에서 추출:', precedentId);
+  }
+  // 3순위: 판례일련번호 필드
+  else if (data.판례일련번호) {
+    precedentId = data.판례일련번호;
+    console.log('판례일련번호 필드에서 추출:', precedentId);
+  }
+  // 4순위: 원본데이터의 다른 필드들 확인
+  else if (data.원본데이터) {
+    console.log('원본데이터 내용:', data.원본데이터);
+    // 가능한 모든 필드명 확인
+    const possibleFields = ['판례일련번호', 'precSeq', 'precedentSeq', 'id'];
+    for (const field of possibleFields) {
+      if (data.원본데이터[field]) {
+        precedentId = data.원본데이터[field];
+        console.log(`원본데이터.${field}에서 추출:`, precedentId);
+        break;
+      }
+    }
+  }
+  
+  // 마지막 수단: 사건번호 사용
+  if (!precedentId) {
+    precedentId = data.사건번호 || '';
+    console.log('사건번호 사용:', precedentId);
+  }
+  
   const precedentName = data.사건명 || data.판례명 || '';
   const court = data.법원명 || '';
   const date = data.선고일자 || '';
   const summary = data.판시사항 || data.요약 || '';
+  
+  console.log('최종 추출된 판례 ID:', precedentId, '타입:', typeof precedentId);
 
   // 외부 링크 처리
   const handleExternalLink = () => {

@@ -1,15 +1,30 @@
-import { useState } from "react";
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Calendar, FileText, AlertCircle } from "lucide-react";
-import { LoadingSpinner } from "./LoadingSpinner";
-import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { FileText, Search, AlertCircle, Settings } from 'lucide-react';
+import { PrecedentCard } from "@/components/law/PrecedentCard";
 
 interface AdvancedPrecedentSearchProps {
   className?: string;
+}
+
+interface PrecedentItem {
+  판례정보일련번호: string;
+  사건명: string;
+  사건번호: string;
+  선고일자: string;
+  법원명: string;
+  판결유형: string;
+  판시사항: string;
+  판결요지: string;
+  참조조문: string;
+  참조판례: string;
+  원본데이터: any;
 }
 
 interface SearchParams {
@@ -26,6 +41,7 @@ interface SearchParams {
 interface SearchResponse {
   success: boolean;
   data: any;
+  precedentList?: PrecedentItem[];
   meta: {
     keyword: string;
     id: string;
@@ -53,7 +69,7 @@ export const AdvancedPrecedentSearch = ({ className }: AdvancedPrecedentSearchPr
     keyword: "",
     id: "bahnntf", // 기본 ID
     display: "100",
-    type: "html",
+    type: "JSON",
     search: "2", // 판시요지와 판시내용
     prncYdStart: "20000101",
     prncYdEnd: "20231231",
@@ -129,132 +145,142 @@ export const AdvancedPrecedentSearch = ({ className }: AdvancedPrecedentSearchPr
     }
   };
 
+  const getScopeText = (scope: string) => {
+    switch (scope) {
+      case '1': return '제목';
+      case '2': return '판시요지와 판시내용';
+      case '3': return '전체';
+      default: return '알 수 없음';
+    }
+  };
+
+  const precedentList = searchResult?.precedentList || [];
+
   return (
     <div className={`space-y-6 ${className}`}>
+      {/* 검색 폼 */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl flex items-center gap-2">
-            <FileText className="h-6 w-6" />
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
             고급 판례 검색
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* 기본 검색 파라미터 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">검색 키워드</label>
-              <Input
-                placeholder="검색할 키워드를 입력하세요"
-                value={searchParams.keyword}
-                onChange={(e) => handleInputChange('keyword', e.target.value)}
-                onKeyPress={handleKeyPress}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">API ID</label>
-              <Input
-                placeholder="API 인증 ID"
-                value={searchParams.id}
-                onChange={(e) => handleInputChange('id', e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* 고급 옵션 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">응답 형식</label>
-              <Select value={searchParams.type} onValueChange={(value) => handleInputChange('type', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="html">HTML</SelectItem>
-                  <SelectItem value="JSON">JSON</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">검색 범위</label>
-              <Select value={searchParams.search} onValueChange={(value) => handleInputChange('search', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">전체</SelectItem>
-                  <SelectItem value="1">제목</SelectItem>
-                  <SelectItem value="2">판시요지와 판시내용</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">결과 개수</label>
-              <Select value={searchParams.display} onValueChange={(value) => handleInputChange('display', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10개</SelectItem>
-                  <SelectItem value="20">20개</SelectItem>
-                  <SelectItem value="50">50개</SelectItem>
-                  <SelectItem value="100">100개</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* 선고일자 범위 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                선고일자 시작 (YYYYMMDD)
-              </label>
-              <Input
-                placeholder="20000101"
-                value={searchParams.prncYdStart}
-                onChange={(e) => handleInputChange('prncYdStart', e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                선고일자 종료 (YYYYMMDD)
-              </label>
-              <Input
-                placeholder="20231231"
-                value={searchParams.prncYdEnd}
-                onChange={(e) => handleInputChange('prncYdEnd', e.target.value)}
-              />
-            </div>
+          {/* 검색 키워드 */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">검색 키워드</label>
+            <Input
+              value={searchParams.keyword}
+              onChange={(e) => handleInputChange('keyword', e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="예: 종합부동산세, 취득세, 재산세..."
+              className="w-full"
+            />
           </div>
 
           {/* 검색 버튼 */}
           <Button 
             onClick={handleSearch} 
-            disabled={isLoading || !searchParams.keyword.trim()}
+            disabled={isLoading}
             className="w-full"
           >
-            <Search className="h-4 w-4 mr-2" />
-            {isLoading ? '검색 중...' : '판례 검색'}
+            {isLoading ? '검색 중...' : '검색'}
           </Button>
 
-          {/* 검색 파라미터 표시 */}
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline">
-              범위: {searchParams.search === '2' ? '판시요지와 판시내용' : 
-                    searchParams.search === '1' ? '제목' : '전체'}
-            </Badge>
-            <Badge variant="outline">
-              기간: {searchParams.prncYdStart}~{searchParams.prncYdEnd}
-            </Badge>
-            <Badge variant="outline">
-              형식: {searchParams.type}
-            </Badge>
-            <Badge variant="outline">
-              개수: {searchParams.display}개
-            </Badge>
+          {/* 고급 검색 옵션 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">사용자 ID</label>
+              <Input
+                value={searchParams.id}
+                onChange={(e) => handleInputChange('id', e.target.value)}
+                placeholder="bahnntf"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">결과 개수</label>
+              <Select value={searchParams.display} onValueChange={(value) => handleInputChange('display', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="20">20개</SelectItem>
+                  <SelectItem value="50">50개</SelectItem>
+                  <SelectItem value="100">100개</SelectItem>
+                  <SelectItem value="200">200개</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">응답 형식</label>
+              <Select value={searchParams.type} onValueChange={(value) => handleInputChange('type', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="JSON">JSON</SelectItem>
+                  <SelectItem value="XML">XML</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">검색 범위</label>
+              <Select value={searchParams.search} onValueChange={(value) => handleInputChange('search', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">제목</SelectItem>
+                  <SelectItem value="2">판시요지와 판시내용</SelectItem>
+                  <SelectItem value="3">전체</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">선고일자 시작</label>
+              <Input
+                value={searchParams.prncYdStart}
+                onChange={(e) => handleInputChange('prncYdStart', e.target.value)}
+                placeholder="YYYYMMDD"
+                maxLength={8}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">선고일자 종료</label>
+              <Input
+                value={searchParams.prncYdEnd}
+                onChange={(e) => handleInputChange('prncYdEnd', e.target.value)}
+                placeholder="YYYYMMDD"
+                maxLength={8}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">페이지</label>
+              <Input
+                value={searchParams.page}
+                onChange={(e) => handleInputChange('page', e.target.value)}
+                placeholder="1"
+                type="number"
+                min="1"
+              />
+            </div>
           </div>
+
+          {/* URL 미리보기 */}
+          {searchParams.keyword.trim() && (
+            <div className="p-3 bg-muted/30 rounded-lg">
+              <div className="text-xs font-mono text-muted-foreground break-all">
+                http://www.law.go.kr/DRF/lawSearch.do?OC={searchParams.id}&target=prec&type={searchParams.type}&query={encodeURIComponent(searchParams.keyword)}&display={searchParams.display}&search={searchParams.search}&page={searchParams.page}&prncYd={searchParams.prncYdStart}~{searchParams.prncYdEnd}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -262,87 +288,99 @@ export const AdvancedPrecedentSearch = ({ className }: AdvancedPrecedentSearchPr
       {isLoading && (
         <LoadingSpinner 
           type="precedent"
-          message="고급 판례 검색을 진행하고 있습니다..."
+          message="판례 검색을 진행하고 있습니다..."
         />
       )}
 
       {/* 오류 표시 */}
       {error && (
-        <Card>
-          <CardContent className="flex items-center justify-center py-8">
-            <div className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="h-5 w-5" />
-              <span>오류: {error}</span>
-            </div>
-          </CardContent>
-        </Card>
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* 검색 결과 */}
       {searchResult && !isLoading && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center justify-between">
-              검색 결과
-              {searchResult.meta.totalCount !== undefined && (
-                <Badge variant="secondary" className="text-lg px-3 py-1">
-                  총 {searchResult.meta.totalCount.toLocaleString()}건
-                </Badge>
-              )}
-            </CardTitle>
-            <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-              <span>키워드: {searchResult.meta.keyword}</span>
-              <span>•</span>
-              <span>{searchResult.meta.searchDescription}</span>
-              <span>•</span>
-              <span>{searchResult.meta.prncYdRange}</span>
-              {searchResult.meta.extractedInfo?.resultMsg && (
-                <>
+        <div className="space-y-4">
+          {/* 검색 결과 요약 */}
+          {searchResult.meta.totalCount !== undefined && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  검색 결과
+                  <Badge variant="secondary" className="text-lg px-3 py-1">
+                    총 {searchResult.meta.totalCount.toLocaleString()}건
+                  </Badge>
+                </CardTitle>
+                <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                  <span>키워드: {searchResult.meta.keyword}</span>
                   <span>•</span>
-                  <span>상태: {searchResult.meta.extractedInfo.resultMsg}</span>
-                </>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {/* totalCount 정보를 강조 표시 */}
-            {searchResult.meta.totalCount !== undefined && (
-              <div className="mb-4 p-3 bg-primary/10 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-primary" />
-                  <span className="font-medium">
-                    총 {searchResult.meta.totalCount.toLocaleString()}건의 판례가 검색되었습니다.
-                  </span>
+                  <span>{searchResult.meta.searchDescription}</span>
+                  <span>•</span>
+                  <span>{searchResult.meta.prncYdRange}</span>
+                  {searchResult.meta.extractedInfo?.resultMsg && (
+                    <>
+                      <span>•</span>
+                      <span>상태: {searchResult.meta.extractedInfo.resultMsg}</span>
+                    </>
+                  )}
                 </div>
-                <div className="text-sm text-muted-foreground mt-1">
-                  현재 페이지: {searchResult.meta.page} / 표시 개수: {searchResult.meta.display}개
+              </CardHeader>
+              <CardContent>
+                <div className="p-3 bg-primary/10 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
+                    <span className="font-medium">
+                      총 {searchResult.meta.totalCount.toLocaleString()}건의 판례가 검색되었습니다.
+                    </span>
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    현재 페이지: {searchResult.meta.page} / 표시 개수: {searchResult.meta.display}개
+                  </div>
                 </div>
-              </div>
-            )}
-            {searchResult.data.contentType === 'html' ? (
-              <div className="space-y-4">
-                <div className="text-sm text-muted-foreground">
-                  HTML 응답을 받았습니다. 응답 크기: {searchResult.data.htmlContent?.length || 0}자
+              </CardContent>
+            </Card>
+          )}
+
+          {/* 판례 목록 */}
+          {precedentList.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>판례 목록 ({precedentList.length}건)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {precedentList.map((precedent, index) => (
+                    <PrecedentCard
+                      key={`${precedent.판례정보일련번호 || precedent.사건번호 || index}`}
+                      data={precedent}
+                    />
+                  ))}
                 </div>
-                <div 
-                  className="max-h-96 overflow-y-auto border rounded p-4 bg-muted/30"
-                  dangerouslySetInnerHTML={{ 
-                    __html: searchResult.data.htmlContent?.substring(0, 2000) + '...' 
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="text-sm text-muted-foreground">
-                  {searchResult.data.contentType} 형식의 응답
+              </CardContent>
+            </Card>
+          )}
+
+          {/* 원본 응답 데이터 (디버깅용) */}
+          {searchResult.data.contentType === 'raw' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-amber-600">원본 응답 데이터</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-sm text-muted-foreground">
+                    파싱 오류가 발생했습니다. 원본 데이터를 확인해주세요.
+                  </div>
+                  <pre className="max-h-96 overflow-auto bg-muted/30 p-4 rounded text-xs">
+                    {JSON.stringify(searchResult.data, null, 2)}
+                  </pre>
                 </div>
-                <pre className="max-h-96 overflow-auto bg-muted/30 p-4 rounded text-xs">
-                  {JSON.stringify(searchResult.data, null, 2)}
-                </pre>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
     </div>
   );

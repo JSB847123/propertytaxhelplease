@@ -1,14 +1,30 @@
-import { useState } from "react";
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, FileText, AlertCircle } from "lucide-react";
-import { LoadingSpinner } from "./LoadingSpinner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { FileText, Search, AlertCircle } from 'lucide-react';
+import { PrecedentCard } from "@/components/law/PrecedentCard";
 
 interface SimplePrecedentSearchProps {
   className?: string;
+}
+
+interface PrecedentItem {
+  판례정보일련번호: string;
+  사건명: string;
+  사건번호: string;
+  선고일자: string;
+  법원명: string;
+  판결유형: string;
+  판시사항: string;
+  판결요지: string;
+  참조조문: string;
+  참조판례: string;
+  원본데이터: any;
 }
 
 interface SearchResult {
@@ -21,7 +37,9 @@ interface SearchResult {
       resultMsg: string;
       keyword: string;
     };
+    precedentList?: PrecedentItem[];
   };
+  precedentList?: PrecedentItem[];
   meta: {
     keyword: string;
     totalCount: number;
@@ -38,7 +56,7 @@ export const SimplePrecedentSearch = ({ className }: SimplePrecedentSearchProps)
   const [error, setError] = useState<string | null>(null);
   
   // 커스터마이징 가능한 검색 파라미터
-  const [type, setType] = useState("html");
+  const [type, setType] = useState("JSON");
   const [display, setDisplay] = useState("100");
   const [prncYdStart, setPrncYdStart] = useState("20000101");
   const [prncYdEnd, setPrncYdEnd] = useState("20231231");
@@ -92,6 +110,8 @@ export const SimplePrecedentSearch = ({ className }: SimplePrecedentSearchProps)
 
       const data = await response.json();
       console.log('검색 결과:', data);
+      console.log('precedentList:', data.precedentList);
+      console.log('data.precedentList:', data.data?.precedentList);
       setSearchResult(data);
 
     } catch (err: any) {
@@ -110,73 +130,72 @@ export const SimplePrecedentSearch = ({ className }: SimplePrecedentSearchProps)
 
   const getScopeText = (scope: string) => {
     switch (scope) {
-      case "1": return "제목";
-      case "2": return "판시요지와 판시내용";
-      case "3": return "전체";
-      default: return "판시요지와 판시내용";
+      case '1': return '제목';
+      case '2': return '판시요지와 판시내용';
+      case '3': return '전체';
+      default: return '알 수 없음';
     }
   };
 
+  const precedentList = searchResult?.precedentList || searchResult?.data?.precedentList || [];
+
   return (
     <div className={`space-y-6 ${className}`}>
+      {/* 검색 폼 */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl flex items-center gap-2">
-            <FileText className="h-6 w-6" />
-            판례 검색
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            간편 판례 검색
           </CardTitle>
-          <div className="text-sm text-muted-foreground">
-            검색 조건을 설정하여 판례를 검색하세요
-          </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* 검색 입력 */}
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Input
-                placeholder="판례 검색 키워드를 입력하세요"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                onKeyPress={handleKeyPress}
-                autoFocus
-              />
-            </div>
-            <Button 
-              onClick={handleSearch} 
-              disabled={isLoading || !keyword.trim()}
-            >
-              <Search className="h-4 w-4 mr-2" />
-              {isLoading ? '검색 중...' : '검색'}
-            </Button>
+          {/* 검색어 입력 */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">검색 키워드</label>
+            <Input
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="예: 종합부동산세, 취득세, 재산세..."
+              className="w-full"
+            />
           </div>
 
-          {/* 검색 조건 설정 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
+          {/* 검색 버튼 */}
+          <Button 
+            onClick={handleSearch} 
+            disabled={isLoading}
+            className="w-full"
+          >
+            {isLoading ? '검색 중...' : '검색'}
+          </Button>
+
+          {/* 고급 옵션 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
             <div className="space-y-2">
-              <label className="text-sm font-medium">형식</label>
+              <label className="text-sm font-medium">응답 형식</label>
               <Select value={type} onValueChange={setType}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="html">HTML</SelectItem>
-                  <SelectItem value="xml">XML</SelectItem>
-                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="JSON">JSON</SelectItem>
+                  <SelectItem value="XML">XML</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">개수</label>
+              <label className="text-sm font-medium">결과 개수</label>
               <Select value={display} onValueChange={setDisplay}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="10">10개</SelectItem>
+                  <SelectItem value="20">20개</SelectItem>
                   <SelectItem value="50">50개</SelectItem>
                   <SelectItem value="100">100개</SelectItem>
-                  <SelectItem value="200">200개</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -237,96 +256,76 @@ export const SimplePrecedentSearch = ({ className }: SimplePrecedentSearchProps)
 
       {/* 오류 표시 */}
       {error && (
-        <Card>
-          <CardContent className="flex items-center justify-center py-8">
-            <div className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="h-5 w-5" />
-              <span>오류: {error}</span>
-            </div>
-          </CardContent>
-        </Card>
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* 검색 결과 */}
       {searchResult && !isLoading && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center justify-between">
-              검색 결과
-              {searchResult.meta.totalCount !== undefined && (
-                <Badge variant="default" className="text-lg px-3 py-1">
-                  총 {searchResult.meta.totalCount.toLocaleString()}건
-                </Badge>
-              )}
-            </CardTitle>
-            <div className="text-sm text-muted-foreground">
-              키워드: <span className="font-medium">{searchResult.meta.keyword}</span> • 
-              {searchResult.meta.searchDescription} • 
-              {searchResult.meta.prncYdRange}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {/* 검색 결과 요약 */}
-            {searchResult.meta.totalCount !== undefined && (
-              <div className="mb-4 p-4 bg-primary/10 border border-primary/20 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-primary" />
-                  <span className="font-semibold text-lg">
-                    총 {searchResult.meta.totalCount.toLocaleString()}건의 판례가 검색되었습니다.
-                  </span>
-                </div>
-                <div className="text-sm text-muted-foreground mt-2">
-                  • 검색 범위: {getScopeText(searchScope)}
-                  <br />
-                  • 기간: {prncYdStart.slice(0,4)}년 {prncYdStart.slice(4,6)}월 {prncYdStart.slice(6,8)}일 ~ {prncYdEnd.slice(0,4)}년 {prncYdEnd.slice(4,6)}월 {prncYdEnd.slice(6,8)}일
-                  <br />
-                  • 결과 형식: {type.toUpperCase()} ({display}개씩 표시)
-                </div>
-              </div>
-            )}
-
-            {/* HTML 응답 내용 */}
-            {searchResult.data.contentType === 'html' && searchResult.data.htmlContent && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium">HTML 응답 내용</div>
-                  <Badge variant="outline">
-                    크기: {searchResult.data.htmlContent.length.toLocaleString()}자
-                  </Badge>
-                </div>
-                
-                {/* HTML 내용 미리보기 */}
-                <div className="max-h-96 overflow-y-auto border rounded-lg">
-                  <div 
-                    className="p-4 text-sm"
-                    dangerouslySetInnerHTML={{ 
-                      __html: searchResult.data.htmlContent.substring(0, 5000) + 
-                              (searchResult.data.htmlContent.length > 5000 ? '...' : '')
-                    }}
-                  />
-                </div>
-
-                {searchResult.data.htmlContent.length > 5000 && (
-                  <div className="text-sm text-muted-foreground text-center">
-                    첫 5,000자만 표시됩니다. 전체 내용은 {searchResult.data.htmlContent.length.toLocaleString()}자입니다.
+        <div className="space-y-4">
+          {/* 검색 결과 요약 */}
+          {searchResult.meta.totalCount !== undefined && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
+                    <span className="font-semibold text-lg">
+                      총 {searchResult.meta.totalCount.toLocaleString()}건의 판례가 검색되었습니다.
+                    </span>
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* 기타 응답 타입 */}
-            {searchResult.data.contentType !== 'html' && (
-              <div className="space-y-4">
-                <div className="text-sm text-muted-foreground">
-                  응답 형식: {searchResult.data.contentType}
+                  <div className="text-sm text-muted-foreground mt-2">
+                    • 검색 범위: {getScopeText(searchScope)}
+                    <br />
+                    • 기간: {prncYdStart.slice(0,4)}년 {prncYdStart.slice(4,6)}월 {prncYdStart.slice(6,8)}일 ~ {prncYdEnd.slice(0,4)}년 {prncYdEnd.slice(4,6)}월 {prncYdEnd.slice(6,8)}일
+                    <br />
+                    • 결과 형식: {type.toUpperCase()} ({display}개씩 표시)
+                  </div>
                 </div>
-                <pre className="max-h-96 overflow-auto bg-muted/30 p-4 rounded text-xs">
-                  {JSON.stringify(searchResult.data, null, 2)}
-                </pre>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* 판례 목록 */}
+          {precedentList.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>판례 목록 ({precedentList.length}건)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {precedentList.map((precedent, index) => (
+                    <PrecedentCard
+                      key={`${precedent.판례정보일련번호 || precedent.사건번호 || index}`}
+                      data={precedent}
+                    />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* 원본 응답 데이터 (디버깅용) */}
+          {searchResult.data.contentType === 'raw' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-amber-600">원본 응답 데이터</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-sm text-muted-foreground">
+                    파싱 오류가 발생했습니다. 원본 데이터를 확인해주세요.
+                  </div>
+                  <pre className="max-h-96 overflow-auto bg-muted/30 p-4 rounded text-xs">
+                    {JSON.stringify(searchResult.data, null, 2)}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
     </div>
   );

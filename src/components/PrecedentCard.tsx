@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar, FileText, Scale, Building2, Bookmark, BookmarkCheck, Tag, StickyNote, Eye } from "lucide-react";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useToast } from "@/hooks/use-toast";
-import { PrecedentDetail } from "./PrecedentDetail";
+import PrecedentDetail from "./PrecedentDetail";
 import type { PrecedentData } from "@/lib/xmlParser";
 
 interface PrecedentCardProps extends PrecedentData {
@@ -35,6 +35,9 @@ export const PrecedentCard = ({
   const [isBookmarkDialogOpen, setIsBookmarkDialogOpen] = useState(false);
   const [tags, setTags] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
+
+  // 디버깅을 위한 로그 추가
+  console.log('PrecedentCard props:', { caseTitle, caseNumber, judgmentDate, courtName, judgmentType, caseContent });
 
   const precedentData: PrecedentData = {
     caseTitle,
@@ -207,13 +210,13 @@ export const PrecedentCard = ({
           <PrecedentDetail 
             precedentId={caseNumber} 
             precedentName={caseTitle}
-            triggerText="전체 내용 보기"
-          >
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              전체 내용 보기
-            </Button>
-          </PrecedentDetail>
+            trigger={
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Eye className="h-4 w-4" />
+                전체 내용 보기
+              </Button>
+            }
+          />
         </div>
       </CardContent>
     </Card>

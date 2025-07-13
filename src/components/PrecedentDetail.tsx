@@ -15,15 +15,26 @@ interface PrecedentDetailProps {
 
 interface PrecedentData {
   success: boolean;
-  data: {
-    precedentId: string;
-    precedentName: string;
-    court: string;
-    date: string;
-    caseNumber: string;
-    summary: string;
-    content: string;
-    externalUrl: string;
+  data?: {
+    판례정보일련번호: string;
+    사건명: string;
+    사건번호: string;
+    선고일자: string;
+    법원명: string;
+    판결유형: string;
+    판시사항: string;
+    판결요지: string;
+    참조조문: string;
+    참조판례: string;
+    판례내용: string;
+    원본HTML?: string;
+  };
+  error?: string;
+  code?: string;
+  message?: string;
+  details?: {
+    externalLink: string;
+    suggestedAction: string;
   };
 }
 
@@ -36,113 +47,216 @@ const PrecedentDetail: React.FC<PrecedentDetailProps> = ({
   const [data, setData] = useState<PrecedentData | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const generateDummyData = (): PrecedentData => {
-    return {
-      success: true,
-      data: {
-        precedentId: precedentId,
-        precedentName: precedentName || '판례명 정보 없음',
-        court: precedentId.includes('서울고등법원') ? '서울고등법원' : 
-               precedentId.includes('대법원') ? '대법원' : 
-               precedentId.includes('서울중앙지방법원') ? '서울중앙지방법원' : '서울고등법원',
-        date: precedentId.includes('2018') ? '2018년 12월 20일' : 
-              precedentId.includes('2019') ? '2019년 3월 15일' : 
-              precedentId.includes('2020') ? '2020년 6월 10일' : '2021년 9월 25일',
-        caseNumber: precedentId,
-        summary: precedentName.includes('종합부동산세') ? 
-                '종합부동산세 경정청구에 관한 사건으로, 토지의 공시지가 산정 방법과 관련된 쟁점을 다룹니다.' :
-                precedentName.includes('취득세') ?
-                '취득세 부과처분에 관한 사건으로, 부동산 취득 시 적용되는 세율과 관련된 쟁점을 다룹니다.' :
-                '부동산 관련 세금 쟁점을 다루는 중요한 판례입니다.',
-        content: `
-          <div class="precedent-content space-y-4">
-            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h2 class="text-lg font-bold text-blue-900 mb-2">📋 판례 상세 내용</h2>
-              <p class="text-sm text-blue-700">
-                현재 법제처 API 서비스 연결에 문제가 있어 데모용 데이터를 표시하고 있습니다.
-              </p>
-            </div>
-            
-            <div class="space-y-3">
-              <h3 class="text-md font-semibold text-gray-800 border-b pb-1">🏛️ 사건 정보</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                <div><strong>사건번호:</strong> ${precedentId}</div>
-                <div><strong>사건명:</strong> ${precedentName || '판례명 정보 없음'}</div>
-                <div><strong>법원:</strong> ${precedentId.includes('서울고등법원') ? '서울고등법원' : '서울고등법원'}</div>
-                <div><strong>선고일:</strong> ${precedentId.includes('2018') ? '2018년 12월 20일' : '2021년 9월 25일'}</div>
-              </div>
-            </div>
-            
-            <div class="space-y-3">
-              <h3 class="text-md font-semibold text-gray-800 border-b pb-1">⚖️ 판시사항</h3>
-              <div class="bg-gray-50 p-3 rounded">
-                <p class="text-sm text-gray-700 mb-2">
-                  ${precedentName.includes('종합부동산세') ? 
-                    '종합부동산세 경정청구에 관한 사건으로, 다음과 같은 쟁점들이 검토되었습니다:' :
-                    '부동산 관련 세금 쟁점에 대한 사건으로, 다음과 같은 쟁점들이 검토되었습니다:'}
-                </p>
-                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                  <li>토지의 개별공시지가 산정 시 적용되는 기준과 방법</li>
-                  <li>종합부동산세 과세표준 산정의 적정성</li>
-                  <li>경정청구의 법적 요건과 적법성 여부</li>
-                  <li>공시지가와 시가의 차이에 대한 법적 판단</li>
-                </ul>
-              </div>
-            </div>
-            
-            <div class="space-y-3">
-              <h3 class="text-md font-semibold text-gray-800 border-b pb-1">📝 판결 요지</h3>
-              <div class="bg-green-50 p-3 rounded border border-green-200">
-                <p class="text-sm text-green-800 mb-2"><strong>법원의 판단:</strong></p>
-                <ol class="list-decimal list-inside text-sm text-green-700 space-y-1">
-                  <li>개별공시지가는 관련 법령에 따라 적정하게 산정되었다고 인정됨</li>
-                  <li>종합부동산세 과세표준 산정 과정에서 절차적, 실체적 하자가 없음</li>
-                  <li>납세자의 주장에는 합리적 근거가 부족함</li>
-                  <li><strong>따라서 경정청구를 기각함</strong></li>
-                </ol>
-              </div>
-            </div>
-            
-            <div class="space-y-3">
-              <h3 class="text-md font-semibold text-gray-800 border-b pb-1">💡 참고사항</h3>
-              <div class="bg-yellow-50 p-3 rounded border border-yellow-200">
-                <p class="text-sm text-yellow-800 mb-2">
-                  <strong>⚠️ 이 내용은 데모용 샘플 데이터입니다.</strong>
-                </p>
-                <p class="text-sm text-yellow-700">
-                  실제 판례 내용은 아래 "법제처에서 원문 보기" 버튼을 통해 확인하실 수 있습니다.
-                  현재 법제처 API 서비스 연결에 일시적인 문제가 있어 정확한 판례 내용을 가져올 수 없습니다.
-                </p>
-              </div>
-            </div>
-          </div>
-        `,
-        externalUrl: `https://www.law.go.kr/precSc.do?menuId=1&subMenuId=25&tabMenuId=117&query=${encodeURIComponent(precedentId)}`
-      }
-    };
-  };
-
   const fetchPrecedentDetail = async () => {
-    if (!precedentId) return;
+    if (!precedentId) {
+      console.error('판례 ID가 없습니다:', { precedentId, precedentName });
+      return;
+    }
     
     setLoading(true);
     
     try {
       console.log('판례 상세 조회 시작:', { precedentId, precedentName });
       
-      // 로딩 효과를 위한 지연
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // 1차 시도: Edge Function을 통해 판례 상세 조회
+      const apiUrl = `https://wouwaifqgzlwnkvpnndg.supabase.co/functions/v1/precedent-detail?ID=${precedentId}${precedentName ? `&LM=${encodeURIComponent(precedentName)}` : ''}`;
+      console.log('Edge Function API 호출:', apiUrl);
       
-      // 더미 데이터 생성
-      const dummyData = generateDummyData();
-      console.log('더미 데이터 생성 완료:', dummyData);
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ',
+          'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ',
+          'Content-Type': 'application/json'
+        }
+      });
       
-      setData(dummyData);
+      console.log('API 응답 상태:', response.status, response.statusText);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('API 응답 데이터:', result);
+        setData(result);
+        return;
+      }
+      
+      // Edge Function 실패 시 에러 응답을 JSON으로 파싱 시도
+      try {
+        const errorText = await response.text();
+        const errorData = JSON.parse(errorText);
+        if (errorData.success === false) {
+          setData(errorData);
+          return;
+        }
+      } catch (parseError) {
+        console.error('에러 응답 파싱 실패:', parseError);
+      }
+      
+      // 2차 시도: 직접 법제처 API 호출 (숫자 ID인 경우만)
+      const isNumericId = /^\d+$/.test(precedentId);
+      if (isNumericId) {
+        console.log('2차 시도: 직접 법제처 API 호출');
+        await tryDirectLawApiCall(precedentId, precedentName);
+        return;
+      }
+      
+      // 3차 시도: 사건번호를 판례일련번호로 변환 후 직접 호출
+      console.log('3차 시도: 사건번호 변환 후 직접 호출');
+      const convertedId = await tryConvertCaseNumber(precedentId);
+      if (convertedId) {
+        await tryDirectLawApiCall(convertedId, precedentName);
+        return;
+      }
+      
+      throw new Error(`판례를 찾을 수 없습니다: ${precedentId}`);
       
     } catch (err: any) {
       console.error('판례 상세 조회 실패:', err);
+      
+      // 에러 발생 시 대체 데이터 설정
+      setData({
+        success: false,
+        error: '판례 상세 조회 중 오류가 발생했습니다',
+        message: err.message || '알 수 없는 오류가 발생했습니다',
+        details: {
+          externalLink: `https://www.law.go.kr/precSc.do?menuId=1&subMenuId=25&tabMenuId=117&query=${encodeURIComponent(precedentId)}`,
+          suggestedAction: '법제처 국가법령정보센터에서 직접 조회해보세요'
+        }
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 사건번호를 판례일련번호로 변환 시도
+  const tryConvertCaseNumber = async (caseNumber: string): Promise<string | null> => {
+    try {
+      // 하드코딩된 매핑 먼저 확인
+      const knownMappings: { [key: string]: string } = {
+        '2005두2261': '68257',
+        '2014다51015': '228541',
+        '2020다296604': '606191',
+        '2024다317332': '606173',
+        '2023다283401': '605333',
+        '2023다318857': '606200' // 임시 매핑
+      };
+      
+      if (knownMappings[caseNumber]) {
+        console.log('하드코딩된 매핑 사용:', caseNumber, '->', knownMappings[caseNumber]);
+        return knownMappings[caseNumber];
+      }
+      
+      // 고급 검색 API를 통한 변환 시도
+      const searchResponse = await fetch(`https://wouwaifqgzlwnkvpnndg.supabase.co/functions/v1/advanced-precedent-search?keyword=${encodeURIComponent(caseNumber)}&display=10&type=JSON`, {
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ'
+        }
+      });
+      
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json();
+        const precedentList = searchData.precedentList || [];
+        
+        for (const prec of precedentList) {
+          const foundCaseNumber = prec.사건번호 || prec.원본데이터?.사건번호;
+          if (foundCaseNumber === caseNumber) {
+            const possibleIds = [
+              prec.판례정보일련번호,
+              prec.판례일련번호,
+              prec.원본데이터?.판례일련번호,
+              prec.원본데이터?.판례정보일련번호
+            ];
+            
+            for (const id of possibleIds) {
+              if (id && /^\d+$/.test(String(id))) {
+                console.log('검색을 통한 변환 성공:', caseNumber, '->', id);
+                return String(id);
+              }
+            }
+          }
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('사건번호 변환 실패:', error);
+      return null;
+    }
+  };
+
+  // 직접 법제처 API 호출 시도 (JSONP 방식)
+  const tryDirectLawApiCall = async (precedentId: string, precedentName?: string): Promise<void> => {
+    try {
+      console.log('직접 법제처 API 호출 시도:', precedentId);
+      
+      // JSONP 콜백을 위한 고유 함수명 생성
+      const callbackName = `lawApiCallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      return new Promise((resolve, reject) => {
+        // 타임아웃 설정 (10초)
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error('법제처 API 호출 시간 초과'));
+        }, 10000);
+        
+        // 콜백 함수 등록
+        (window as any)[callbackName] = (data: any) => {
+          cleanup();
+          
+          try {
+            if (data && typeof data === 'object') {
+              setData({
+                success: true,
+                data: {
+                  판례정보일련번호: precedentId,
+                  사건명: precedentName || data.사건명 || '',
+                  사건번호: data.사건번호 || '',
+                  선고일자: data.선고일자 || '',
+                  법원명: data.법원명 || '',
+                  판결유형: data.판결유형 || '',
+                  판시사항: data.판시사항 || '',
+                  판결요지: data.판결요지 || '',
+                  참조조문: data.참조조문 || '',
+                  참조판례: data.참조판례 || '',
+                  판례내용: data.판례내용 || '판례 내용을 불러올 수 없습니다.',
+                  원본HTML: JSON.stringify(data)
+                }
+              });
+              resolve();
+            } else {
+              reject(new Error('법제처 API에서 유효하지 않은 응답을 받았습니다'));
+            }
+          } catch (error) {
+            reject(error);
+          }
+        };
+        
+        // 정리 함수
+        const cleanup = () => {
+          clearTimeout(timeout);
+          delete (window as any)[callbackName];
+          const script = document.getElementById(callbackName);
+          if (script) {
+            document.head.removeChild(script);
+          }
+        };
+        
+        // JSONP 스크립트 태그 생성
+        const script = document.createElement('script');
+        script.id = callbackName;
+        script.src = `http://www.law.go.kr/DRF/lawService.do?OC=bahnntf&target=prec&ID=${precedentId}&type=JSON&callback=${callbackName}${precedentName ? `&LM=${encodeURIComponent(precedentName)}` : ''}`;
+        
+        script.onerror = () => {
+          cleanup();
+          reject(new Error('법제처 API 스크립트 로드 실패'));
+        };
+        
+        document.head.appendChild(script);
+      });
+      
+    } catch (error) {
+      console.error('직접 API 호출 실패:', error);
+      throw error;
     }
   };
 
@@ -158,10 +272,10 @@ const PrecedentDetail: React.FC<PrecedentDetailProps> = ({
     fetchPrecedentDetail();
   };
 
-  const handleExternalLink = () => {
+  const handleExternalLink = (url?: string) => {
     const searchQuery = precedentId || precedentName;
-    const url = `https://www.law.go.kr/precSc.do?menuId=1&subMenuId=25&tabMenuId=117&query=${encodeURIComponent(searchQuery)}`;
-    window.open(url, '_blank');
+    const defaultUrl = `https://www.law.go.kr/precSc.do?menuId=1&subMenuId=25&tabMenuId=117&query=${encodeURIComponent(searchQuery)}`;
+    window.open(url || defaultUrl, '_blank');
   };
 
   return (
@@ -187,63 +301,141 @@ const PrecedentDetail: React.FC<PrecedentDetailProps> = ({
             </div>
           )}
           
-          {!loading && data?.success && data.data && (
-            <div className="space-y-4">
-              <Alert className="border-blue-200 bg-blue-50">
-                <Info className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-blue-800">
-                  <div className="flex items-center justify-between">
-                    <span>판례 상세 내용을 성공적으로 불러왔습니다.</span>
+          {!loading && data && !data.success && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <div className="space-y-3">
+                  <div>
+                    <strong>오류:</strong> {data.error}
+                  </div>
+                  {data.message && (
+                    <div className="text-sm text-gray-600 whitespace-pre-line">
+                      {data.message}
+                    </div>
+                  )}
+                  {data.details?.suggestedAction && (
+                    <div className="text-sm text-gray-600">
+                      💡 {data.details.suggestedAction}
+                    </div>
+                  )}
+                  <div className="flex gap-2 pt-2">
                     <Button 
-                      size="sm" 
                       variant="outline" 
+                      size="sm" 
                       onClick={handleRetry}
-                      className="border-blue-300 text-blue-700 hover:bg-blue-100"
                     >
-                      <RefreshCw className="w-3 h-3 mr-1" />
-                      새로고침
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      다시 시도
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleExternalLink(data.details?.externalLink)}
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      법제처에서 보기
                     </Button>
                   </div>
-                </AlertDescription>
-              </Alert>
-              
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {!loading && data && data.success && data.data && (
+            <div className="space-y-4">
               <Card className="shadow-sm">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg leading-tight">{data.data.precedentName}</CardTitle>
+                  <CardTitle className="text-lg leading-tight">
+                    {data.data.사건명 || precedentName || '사건명 없음'}
+                  </CardTitle>
                   <CardDescription>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      <Badge variant="secondary" className="text-xs">{data.data.court}</Badge>
-                      <Badge variant="outline" className="text-xs">{data.data.date}</Badge>
-                      <Badge variant="outline" className="text-xs">{data.data.caseNumber}</Badge>
+                      {data.data.법원명 && (
+                        <Badge variant="secondary" className="text-xs">
+                          {data.data.법원명}
+                        </Badge>
+                      )}
+                      {data.data.선고일자 && (
+                        <Badge variant="outline" className="text-xs">
+                          {data.data.선고일자}
+                        </Badge>
+                      )}
+                      {data.data.사건번호 && (
+                        <Badge variant="outline" className="text-xs">
+                          {data.data.사건번호}
+                        </Badge>
+                      )}
+                      {data.data.판결유형 && (
+                        <Badge variant="outline" className="text-xs">
+                          {data.data.판결유형}
+                        </Badge>
+                      )}
                     </div>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div>
-                      <h4 className="font-semibold text-sm text-gray-700 mb-2">📋 사건 요약</h4>
-                      <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">{data.data.summary}</p>
-                    </div>
+                    {/* 판시사항 */}
+                    {data.data.판시사항 && (
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-2">📋 판시사항</h4>
+                        <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded whitespace-pre-wrap">
+                          {data.data.판시사항}
+                        </div>
+                      </div>
+                    )}
                     
-                    <Separator />
+                    {/* 판결요지 */}
+                    {data.data.판결요지 && (
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-2">⚖️ 판결요지</h4>
+                        <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded whitespace-pre-wrap">
+                          {data.data.판결요지}
+                        </div>
+                      </div>
+                    )}
                     
-                    <div>
-                      <h4 className="font-semibold text-sm text-gray-700 mb-3">📄 판례 상세 내용</h4>
-                      <div 
-                        className="prose prose-sm max-w-none"
-                        dangerouslySetInnerHTML={{ __html: data.data.content }}
-                      />
-                    </div>
+                    {/* 참조조문 */}
+                    {data.data.참조조문 && (
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-2">📖 참조조문</h4>
+                        <div className="text-sm text-gray-600 bg-green-50 p-3 rounded whitespace-pre-wrap">
+                          {data.data.참조조문}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* 참조판례 */}
+                    {data.data.참조판례 && (
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-2">🔗 참조판례</h4>
+                        <div className="text-sm text-gray-600 bg-yellow-50 p-3 rounded whitespace-pre-wrap">
+                          {data.data.참조판례}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* 판례내용 */}
+                    {data.data.판례내용 && (
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-3">📄 판례 전문</h4>
+                        <div className="text-sm text-gray-700 bg-white border p-4 rounded max-h-96 overflow-y-auto whitespace-pre-wrap">
+                          {data.data.판례내용}
+                        </div>
+                      </div>
+                    )}
                     
                     <Separator />
                     
                     <div className="flex justify-between items-center">
                       <p className="text-xs text-gray-500">
-                        💡 실제 판례 내용은 법제처 웹사이트에서 확인하실 수 있습니다.
+                        💡 법제처 국가법령정보센터에서 제공하는 정보입니다.
                       </p>
                       <Button 
                         variant="outline" 
-                        onClick={() => window.open(data.data.externalUrl, '_blank')}
+                        size="sm"
+                        onClick={() => handleExternalLink()}
                         className="text-blue-600 hover:text-blue-800"
                       >
                         <ExternalLink className="w-4 h-4 mr-2" />
