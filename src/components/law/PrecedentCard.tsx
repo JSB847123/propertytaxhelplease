@@ -6,9 +6,11 @@ import PrecedentDetail from "../PrecedentDetail";
 
 interface PrecedentCardProps {
   data: any;
+  onClick?: (item: any) => void;
+  className?: string;
 }
 
-export const PrecedentCard = ({ data }: PrecedentCardProps) => {
+export const PrecedentCard = ({ data, onClick, className }: PrecedentCardProps) => {
   // 판례 정보 추출 및 디버깅
   console.log('PrecedentCard 데이터:', data);
   console.log('원본 데이터 키들:', Object.keys(data));

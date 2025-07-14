@@ -274,7 +274,7 @@ export class LegalCaseService {
       return new APIResponseError(message, statusCode, error.message);
     }
     
-    return new APIResponseError(error.message || '알 수 없는 오류가 발생했습니다.');
+    return new APIResponseError(error.message || '알 수 없는 오류가 발생했습니다.', 500);
   }
 }
 

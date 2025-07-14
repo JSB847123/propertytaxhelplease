@@ -8,7 +8,7 @@ import { SearchForm, type SearchFormData } from "@/components/law/SearchForm";
 import { SearchResults } from "@/components/law/SearchResults";
 import { LawTextSearch } from "@/components/law/LawTextSearch";
 import type { LawData } from "@/components/law/LawCard";
-import type { PrecedentData } from "@/components/law/PrecedentCard";
+import type { PrecedentData } from "@/lib/xmlParser";
 
 const LawSearch = () => {
   const navigate = useNavigate();

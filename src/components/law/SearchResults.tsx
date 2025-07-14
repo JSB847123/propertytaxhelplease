@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { MoreHorizontal, Filter, SortAsc, SortDesc, Grid, List, Download } from "lucide-react";
 import { LawCard, type LawData } from "./LawCard";
-import { PrecedentCard, type PrecedentData } from "./PrecedentCard";
+import { PrecedentCard } from "./PrecedentCard";
+import type { PrecedentData } from "@/lib/xmlParser";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { EmptyState } from "./EmptyState";
 import { cn } from "@/lib/utils";
@@ -365,7 +366,6 @@ export const SearchResults = ({
             <PrecedentCard
               key={index}
               data={item as PrecedentData}
-              searchTerm={searchTerm}
               onClick={handleItemClick}
               className={cn(viewMode === "list" && "hover:bg-muted/50")}
             />

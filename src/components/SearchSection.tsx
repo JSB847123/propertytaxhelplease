@@ -257,7 +257,6 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="law">법령</SelectItem>
-              <SelectItem value="precedent">판례</SelectItem>
             </SelectContent>
           </Select>
           
