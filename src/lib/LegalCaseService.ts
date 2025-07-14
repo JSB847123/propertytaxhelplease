@@ -64,8 +64,9 @@ export interface CaseDetailResponse {
  */
 export class LegalCaseService {
   private readonly OC = 'bahnntf';
-  private readonly baseUrl = 'https://wouwaifqgzlwnkvpnndg.supabase.co/functions/v1/advanced-precedent-search';
-  private readonly detailUrl = 'https://wouwaifqgzlwnkvpnndg.supabase.co/functions/v1/precedent-detail';
+  private readonly baseUrl = '/api/law/lawSearch.do';
+  private readonly detailUrl = '/api/law/lawService.do';
+  private readonly proxyUrl = 'https://wouwaifqgzlwnkvpnndg.supabase.co/functions/v1';
 
   /**
    * 판례 목록 검색
@@ -79,13 +80,15 @@ export class LegalCaseService {
         throw new Error('검색어를 입력해주세요');
       }
 
-      // API 파라미터 구성 - Supabase function 형식
+      // API 파라미터 구성
       const searchParams = new URLSearchParams({
-        q: params.query.trim(),
-        search: params.search || '2',
+        query: params.query.trim(),
+        OC: this.OC,
+        target: 'prec',
+        type: 'JSON',
+        search: params.search || '2', // 기본값: 본문검색
         display: Math.min(params.display || 20, 100).toString(),
         page: (params.page || 1).toString(),
-        sort: params.sort || 'date',
         prncYdStart: params.prncYdStart || '20000101',
         prncYdEnd: params.prncYdEnd || '20241231'
       });
@@ -95,7 +98,12 @@ export class LegalCaseService {
         searchParams.append('curt', params.curt);
       }
 
-      // Supabase function 호출
+      // 정렬 옵션 추가
+      if (params.sort) {
+        searchParams.append('sort', params.sort);
+      }
+
+      // 직접 API 호출
       const response = await fetch(`${this.baseUrl}?${searchParams.toString()}`, {
         method: 'GET',
         headers: {
@@ -177,9 +185,12 @@ export class LegalCaseService {
         throw new Error('판례 ID를 입력해주세요');
       }
 
-      // Supabase function 호출
+      // 직접 API 호출
       const detailParams = new URLSearchParams({
-        id: caseId
+        target: 'prec',
+        ID: caseId,
+        OC: this.OC,
+        type: 'JSON'
       });
 
       const response = await fetch(`${this.detailUrl}?${detailParams.toString()}`, {
