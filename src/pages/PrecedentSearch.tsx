@@ -135,14 +135,7 @@ export const PrecedentSearch: React.FC = () => {
                       <li>본문검색: 전체 내용에서 검색</li>
                     </ul>
                   </div>
-                  <div>
-                    <strong>고급 검색:</strong>
-                    <ul className="list-disc list-inside mt-1 space-y-1 text-gray-600">
-                      <li>법원별 필터링</li>
-                      <li>선고일자 범위 설정</li>
-                      <li>정렬 옵션 선택</li>
-                    </ul>
-                  </div>
+
                 </CardContent>
               </Card>
             </div>

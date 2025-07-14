@@ -273,14 +273,7 @@ export const SearchSection = ({ onSearch, searchTerm, setSearchTerm, resultCount
             </SelectContent>
           </Select>
           
-          <Button 
-            variant="outline" 
-            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-            className="flex items-center gap-2"
-          >
-            <Settings className="h-4 w-4" />
-            고급옵션
-          </Button>
+
         </div>
 
         {/* 고급 옵션 (판례 검색용) */}

@@ -11,6 +11,8 @@ interface PrecedentDetailProps {
   precedentId: string;
   precedentName: string;
   trigger: React.ReactNode;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 interface PrecedentData {
@@ -49,11 +51,23 @@ interface PrecedentData {
 const PrecedentDetail: React.FC<PrecedentDetailProps> = ({ 
   precedentId, 
   precedentName, 
-  trigger 
+  trigger, 
+  isOpen: propIsOpen,
+  onOpenChange: propOnOpenChange
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [data, setData] = useState<PrecedentData | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // 외부에서 제어되는 경우와 내부에서 제어되는 경우를 구분
+  const isControlledExternally = propIsOpen !== undefined && propOnOpenChange !== undefined;
+  const isOpen = isControlledExternally ? propIsOpen : internalIsOpen;
+
+  useEffect(() => {
+    if (isOpen && !data && !loading) {
+      fetchPrecedentDetail();
+    }
+  }, [isOpen, data, loading]);
 
   const fetchPrecedentDetail = async () => {
     if (!precedentId) {
@@ -310,9 +324,9 @@ const PrecedentDetail: React.FC<PrecedentDetailProps> = ({
   };
 
   const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (open && !data && !loading) {
-      fetchPrecedentDetail();
+    setInternalIsOpen(open);
+    if (propOnOpenChange) {
+      propOnOpenChange(open);
     }
   };
 
@@ -482,8 +496,96 @@ const PrecedentDetail: React.FC<PrecedentDetailProps> = ({
                     {data.data.판례내용 && (
                       <div>
                         <h4 className="font-semibold text-sm text-gray-700 mb-3">📄 판례 전문</h4>
-                        <div className="text-sm text-gray-700 bg-white border p-4 rounded max-h-96 overflow-y-auto whitespace-pre-wrap">
-                          {data.data.판례내용}
+                        <div className="text-sm text-gray-700 bg-white border p-4 rounded max-h-96 overflow-y-auto leading-relaxed">
+                          {data.data.판례내용.split(/\n\s*\n+/).map((paragraph, index) => {
+                            const trimmedParagraph = paragraph.trim();
+                            if (!trimmedParagraph) return null;
+                            
+                            return (
+                              <div key={index} className="mb-8 last:mb-0">
+                                {trimmedParagraph.split('\n').map((line, lineIndex) => {
+                                  const trimmedLine = line.trim();
+                                  if (!trimmedLine) return null;
+                                  
+                                  // 더 정교한 헤더/제목 인식 패턴
+                                  const isMainHeader = 
+                                    /^[【】『』「」].+[【】『』「」]$/.test(trimmedLine) || // 괄호로 둘러싸인 제목
+                                    /^[가-힣\s]*\s*:$/.test(trimmedLine) || // 콜론으로 끝나는 제목
+                                    /^[가-힣\s]*판시사항|^[가-힣\s]*판결요지|^[가-힣\s]*참조조문|^[가-힣\s]*참조판례/.test(trimmedLine) || // 판례 섹션 헤더
+                                    /^주\s*문|^이\s*유|^판\s*결|^사\s*실|^당사자/.test(trimmedLine); // 주요 섹션
+
+                                  const isSubHeader = 
+                                    /^[0-9]+\.|^[가-힣]\.|^[ㄱ-ㅎ]\.|^[①-⑳]|^[㉠-㉯]/.test(trimmedLine) || // 숫자나 한글 순서
+                                    /^○|^●|^■|^□|^▶|^◆|^◇|^▲|^△/.test(trimmedLine) || // 특수 기호
+                                    /^\([가-힣0-9]+\)|^\[[가-힣0-9]+\]/.test(trimmedLine) || // 괄호 안의 순서
+                                    (trimmedLine.length < 40 && /判|判事|判決|裁判|事件|號|法院|審|원고|피고|상고|항소|재심/.test(trimmedLine)); // 법률 용어가 포함된 짧은 텍스트
+
+                                  const isLegalReference = 
+                                    /제\s*\d+\s*조|제\s*\d+\s*항|제\s*\d+\s*호|제\s*\d+\s*목/.test(trimmedLine) || // 조항 참조
+                                    /법률\s*제\s*\d+호|대통령령\s*제\s*\d+호|부령\s*제\s*\d+호/.test(trimmedLine) || // 법령 참조
+                                    /민법|상법|형법|헌법|행정법|세법|노동법/.test(trimmedLine); // 법률명
+
+                                  const isCourtInfo = 
+                                    /대법원|고등법원|지방법원|가정법원|행정법원|특허법원/.test(trimmedLine) || // 법원명
+                                    /\d{4}\.\s*\d{1,2}\.\s*\d{1,2}\.|\d{4}년\s*\d{1,2}월\s*\d{1,2}일/.test(trimmedLine) || // 날짜
+                                    /사건번호|선고일|판결일|접수일/.test(trimmedLine); // 사건 정보
+
+                                  const isQuote = 
+                                    /^"|"|'|'/.test(trimmedLine) || // 인용부호로 시작
+                                    /라고\s*판시|라고\s*설시|라고\s*판단|라고\s*결정/.test(trimmedLine); // 인용 표현
+
+                                  // 스타일 적용
+                                  let className = 'text-gray-700 mb-3 leading-relaxed';
+                                  let additionalElements = null;
+
+                                  if (isMainHeader) {
+                                    className = 'font-bold text-gray-900 text-base mt-6 mb-4 first:mt-0 border-l-4 border-blue-600 pl-4 bg-blue-50 py-3 rounded-r shadow-sm';
+                                  } else if (isSubHeader) {
+                                    className = 'font-semibold text-gray-800 mt-4 mb-3 border-l-3 border-green-500 pl-3 bg-green-50 py-2 rounded-r';
+                                  } else if (isLegalReference) {
+                                    className = 'text-gray-700 mb-3 leading-relaxed bg-yellow-50 p-2 rounded border-l-2 border-yellow-400';
+                                  } else if (isCourtInfo) {
+                                    className = 'text-gray-600 mb-3 leading-relaxed bg-gray-50 p-2 rounded italic';
+                                  } else if (isQuote) {
+                                    className = 'text-gray-700 mb-3 leading-relaxed bg-purple-50 p-3 rounded border-l-2 border-purple-400 italic';
+                                  }
+
+                                  // 긴 문단의 경우 추가 여백
+                                  if (trimmedLine.length > 100) {
+                                    className += ' mb-4';
+                                  }
+
+                                  // 문장 끝 처리 개선
+                                  const processedLine = trimmedLine
+                                    .replace(/\.\s+/g, '. ') // 문장 끝 공백 정리
+                                    .replace(/,\s+/g, ', ') // 쉼표 뒤 공백 정리
+                                    .replace(/;\s+/g, '; ') // 세미콜론 뒤 공백 정리
+                                    .replace(/:\s+/g, ': '); // 콜론 뒤 공백 정리
+
+                                  return (
+                                    <div key={lineIndex} className={className}>
+                                      {processedLine}
+                                      {additionalElements}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })}
+                          
+                          {/* 추가 가독성 개선 요소 */}
+                          <div className="mt-6 pt-4 border-t border-gray-200">
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <div className="w-3 h-3 bg-blue-50 border-l-2 border-blue-600 rounded-r"></div>
+                              <span>주요 섹션</span>
+                              <div className="w-3 h-3 bg-green-50 border-l-2 border-green-500 rounded-r ml-4"></div>
+                              <span>하위 항목</span>
+                              <div className="w-3 h-3 bg-yellow-50 border-l-2 border-yellow-400 rounded-r ml-4"></div>
+                              <span>법령 참조</span>
+                              <div className="w-3 h-3 bg-purple-50 border-l-2 border-purple-400 rounded-r ml-4"></div>
+                              <span>인용문</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}

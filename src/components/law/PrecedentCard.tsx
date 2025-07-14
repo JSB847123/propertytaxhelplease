@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Eye } from "lucide-react";
 import PrecedentDetail from "../PrecedentDetail";
+import { useState } from "react";
 
 interface PrecedentCardProps {
   data: any;
@@ -11,6 +12,8 @@ interface PrecedentCardProps {
 }
 
 export const PrecedentCard = ({ data, onClick, className }: PrecedentCardProps) => {
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
   // 판례 정보 추출 및 디버깅
   console.log('PrecedentCard 데이터:', data);
   console.log('원본 데이터 키들:', Object.keys(data));
@@ -67,10 +70,20 @@ export const PrecedentCard = ({ data, onClick, className }: PrecedentCardProps) 
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  // 제목 클릭 시 상세보기 열기
+  const handleTitleClick = () => {
+    if (precedentId) {
+      setIsDetailOpen(true);
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-lg">
+        <CardTitle 
+          className="text-lg cursor-pointer hover:text-blue-600 hover:underline transition-colors"
+          onClick={handleTitleClick}
+        >
           {precedentName || '판례명 없음'}
         </CardTitle>
         <div className="flex flex-wrap gap-2 mt-2">
@@ -97,25 +110,20 @@ export const PrecedentCard = ({ data, onClick, className }: PrecedentCardProps) 
               <PrecedentDetail
                 precedentId={precedentId}
                 precedentName={precedentName}
+                isOpen={isDetailOpen}
+                onOpenChange={setIsDetailOpen}
                 trigger={
-                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-2"
+                  >
                     <Eye className="h-4 w-4" />
-                    전체 내용 보기
+                    상세보기
                   </Button>
                 }
               />
             )}
-            
-            {/* 외부 링크 버튼 */}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleExternalLink}
-              className="flex items-center gap-2"
-            >
-              <ExternalLink className="h-4 w-4" />
-              법제처에서 보기
-            </Button>
           </div>
         </div>
       </CardContent>

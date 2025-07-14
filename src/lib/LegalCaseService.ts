@@ -7,7 +7,7 @@ export interface SearchParams {
   display?: number; // 결과 개수 (최대 100)
   page?: number; // 페이지 번호
   curt?: string; // 법원명
-  sort?: 'date' | 'score'; // 정렬 옵션
+  sort?: 'date' | 'date_asc' | 'score'; // 정렬 옵션
   prncYdStart?: string; // 시작 선고일자 (YYYYMMDD)
   prncYdEnd?: string; // 종료 선고일자 (YYYYMMDD)
 }

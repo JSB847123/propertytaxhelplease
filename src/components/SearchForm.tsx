@@ -19,7 +19,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading = fa
   const [display, setDisplay] = useState(20);
   const [page, setPage] = useState(1);
   const [curt, setCurt] = useState('');
-  const [sort, setSort] = useState<'date' | 'score'>('date');
+  const [sort, setSort] = useState<'date' | 'date_asc' | 'score'>('date');
   const [prncYdStart, setPrncYdStart] = useState('20000101');
   const [prncYdEnd, setPrncYdEnd] = useState('20241231');
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -127,12 +127,13 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading = fa
               </div>
               <div className="w-32">
                 <Label htmlFor="sort">정렬</Label>
-                <Select value={sort} onValueChange={(value: 'date' | 'score') => setSort(value)}>
+                <Select value={sort} onValueChange={(value: 'date' | 'date_asc' | 'score') => setSort(value)}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="date">날짜순</SelectItem>
+                    <SelectItem value="date">날짜순 (최신순)</SelectItem>
+                    <SelectItem value="date_asc">날짜순 (과거순)</SelectItem>
                     <SelectItem value="score">관련도순</SelectItem>
                   </SelectContent>
                 </Select>

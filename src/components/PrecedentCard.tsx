@@ -1,17 +1,23 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, FileText, Scale, Building2, Bookmark, BookmarkCheck, Tag, StickyNote, Eye } from "lucide-react";
-import { useBookmarks } from "@/hooks/useBookmarks";
 import { useToast } from "@/hooks/use-toast";
+import { useBookmarks } from "@/hooks/useBookmarks";
+import { Bookmark, BookmarkCheck, Eye, FileText, Calendar, Building2, StickyNote, Scale, Tag } from 'lucide-react';
 import PrecedentDetail from "./PrecedentDetail";
 import type { PrecedentData } from "@/lib/xmlParser";
 
-interface PrecedentCardProps extends PrecedentData {
+interface PrecedentCardProps {
+  caseTitle: string;
+  caseNumber: string;
+  judgmentDate: string;
+  courtName: string;
+  judgmentType: string;
+  caseContent?: string;
   showBookmarkButton?: boolean;
 }
 
@@ -25,6 +31,7 @@ export const PrecedentCard = ({
   showBookmarkButton = true
 }: PrecedentCardProps) => {
   const { toast } = useToast();
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const { 
     isBookmarked, 
     addBookmark, 
@@ -86,11 +93,19 @@ export const PrecedentCard = ({
     setNotes("");
   };
 
+  // 제목 클릭 시 상세보기 열기
+  const handleTitleClick = () => {
+    setIsDetailOpen(true);
+  };
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <CardTitle className="text-lg leading-tight pr-4 flex-1">
+          <CardTitle 
+            className="text-lg leading-tight pr-4 flex-1 cursor-pointer hover:text-blue-600 hover:underline transition-colors"
+            onClick={handleTitleClick}
+          >
             {caseTitle}
           </CardTitle>
           <div className="flex items-center gap-2 shrink-0">
@@ -210,6 +225,8 @@ export const PrecedentCard = ({
           <PrecedentDetail 
             precedentId={caseNumber} 
             precedentName={caseTitle}
+            isOpen={isDetailOpen}
+            onOpenChange={setIsDetailOpen}
             trigger={
               <Button variant="outline" size="sm" className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />

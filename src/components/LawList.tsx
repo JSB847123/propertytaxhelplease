@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Search, FileText, ExternalLink, Calendar, Building } from "lucide-react";
+import { AlertCircle, Search, FileText, ExternalLink, Calendar, Building, Star } from "lucide-react";
+import { useBookmarks } from "@/hooks/useBookmarks";
+import { useToast } from "@/hooks/use-toast";
 import type { LawData } from "@/lib/xmlParser";
 
 interface LawListProps {
@@ -30,6 +32,14 @@ export const LawList = ({
   error,
   searchTerm 
 }: LawListProps) => {
+  const { toast } = useToast();
+  const { 
+    isLawBookmarked, 
+    addLawBookmark, 
+    removeLawBookmarkByLawId 
+  } = useBookmarks();
+  
+
   if (isLoading) {
     return (
       <Card>
@@ -87,6 +97,25 @@ export const LawList = ({
     }
   };
 
+  const handleBookmarkClick = (law: LawItem) => {
+    if (isLawBookmarked(law.법령ID)) {
+      removeLawBookmarkByLawId(law.법령ID);
+      toast({
+        title: "즐겨찾기 삭제",
+        description: "법령이 즐겨찾기에서 제거되었습니다.",
+      });
+    } else {
+      // 대화상자 없이 바로 즐겨찾기에 추가
+      addLawBookmark(law, [], undefined);
+      toast({
+        title: "즐겨찾기 추가",
+        description: "법령이 즐겨찾기에 추가되었습니다.",
+      });
+    }
+  };
+
+
+
   const formatDate = (dateStr: string) => {
     if (!dateStr || dateStr.length !== 8) return dateStr;
     return `${dateStr.slice(0, 4)}.${dateStr.slice(4, 6)}.${dateStr.slice(6, 8)}`;
@@ -119,15 +148,36 @@ export const LawList = ({
             <CardContent className="p-6">
               <div className="space-y-4">
                 {/* 법령명과 약칭 */}
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    {lawItem.법령명한글}
-                  </h3>
-                  {lawItem.법령약칭명 && (
-                    <p className="text-sm text-muted-foreground">
-                      약칭: {lawItem.법령약칭명}
-                    </p>
-                  )}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 
+                      className="text-lg font-semibold text-foreground mb-2 cursor-pointer hover:text-blue-600 hover:underline transition-colors"
+                      onClick={() => handleLawClick(lawItem)}
+                    >
+                      {lawItem.법령명한글}
+                    </h3>
+                    {lawItem.법령약칭명 && (
+                      <p className="text-sm text-muted-foreground">
+                        약칭: {lawItem.법령약칭명}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleBookmarkClick(lawItem)}
+                    className={`h-8 w-8 p-0 ml-2 ${
+                      isLawBookmarked(lawItem.법령ID) 
+                        ? 'text-yellow-500 hover:text-yellow-600' 
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Star 
+                      className={`h-4 w-4 ${
+                        isLawBookmarked(lawItem.법령ID) ? 'fill-current' : ''
+                      }`} 
+                    />
+                  </Button>
                 </div>
 
                 {/* 법령 정보 배지들 */}
@@ -173,6 +223,8 @@ export const LawList = ({
           </Card>
         );
       })}
+
+
     </div>
   );
 };

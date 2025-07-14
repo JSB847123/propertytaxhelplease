@@ -30,23 +30,33 @@ export const LawCard = ({
   onBookmark,
   className = "" 
 }: LawCardProps) => {
-  const { bookmarks, addBookmark, removeBookmark } = useBookmarks();
-  const isBookmarked = bookmarks.some(b => b.id === data.법령ID);
+  const { 
+    isLawBookmarked, 
+    addLawBookmark, 
+    removeLawBookmarkByLawId 
+  } = useBookmarks();
+  
+  const isBookmarked = isLawBookmarked(data.법령ID || "");
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     
     if (isBookmarked) {
-      removeBookmark(data.법령ID || "");
+      removeLawBookmarkByLawId(data.법령ID || "");
     } else {
-      addBookmark({
-        id: data.법령ID || "",
-        type: "law",
-        title: data.법령명 || "제목 없음",
-        data: data,
-        tags: [],
-        notes: ""
-      });
+      // 법령 데이터를 올바른 형식으로 변환
+      const lawData = {
+        법령명한글: data.법령명 || "제목 없음",
+        법령구분명: "법령", // 기본값
+        소관부처명: data.소관부처 || "",
+        공포일자: data.공포일자 || "",
+        시행일자: data.시행일자 || "",
+        법령상세링크: "", // 기본값
+        법령약칭명: "",
+        제개정구분명: "",
+        법령ID: data.법령ID || ""
+      };
+      addLawBookmark(lawData, [], undefined);
     }
     
     onBookmark?.(data, !isBookmarked);
@@ -105,10 +115,14 @@ export const LawCard = ({
               variant="ghost"
               size="sm"
               onClick={handleBookmarkClick}
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              className={`transition-colors ${
+                isBookmarked 
+                  ? 'text-yellow-500 hover:text-yellow-600' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
             >
               {isBookmarked ? (
-                <BookmarkCheck className="h-4 w-4 text-primary" />
+                <BookmarkCheck className="h-4 w-4" />
               ) : (
                 <Bookmark className="h-4 w-4" />
               )}
