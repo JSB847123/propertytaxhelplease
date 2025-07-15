@@ -250,99 +250,151 @@ function parseHtmlResponse(html: string, precedentId: string, precedentName: str
       return '';
     };
 
-    // 판례내용 특별 처리 함수 - 완전히 새로운 접근법
+    // 판례내용 특별 처리 함수 - 법제처 API의 다양한 형식을 처리
     const extractPrecedentContent = (): string => {
       console.log('판례내용 추출 시작, HTML 길이:', html.length);
       
-      // 원본 HTML을 로그로 출력 (디버깅용 - 처음 1000자)
-      console.log('원본 HTML 일부:', html.substring(0, 1000));
+      // 원본 HTML을 로그로 출력 (디버깅용)
+      console.log('원본 HTML 전체:', html);
       
-      // 법제처 API는 보통 플레인 텍스트나 매우 단순한 HTML을 반환
-      // 모든 HTML 태그를 제거하고 전체 텍스트를 추출
-      let fullText = html
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // 스크립트 제거
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '') // 스타일 제거
-        .replace(/<br[^>]*>/gi, '\n') // br 태그를 줄바꿈으로
-        .replace(/<\/p>/gi, '\n\n') // p 태그 끝을 두 줄바꿈으로
-        .replace(/<p[^>]*>/gi, '') // p 태그 시작 제거
-        .replace(/<\/div>/gi, '\n') // div 끝을 줄바꿈으로
-        .replace(/<div[^>]*>/gi, '') // div 시작 제거
-        .replace(/<\/tr>/gi, '\n') // tr 끝을 줄바꿈으로
-        .replace(/<tr[^>]*>/gi, '') // tr 시작 제거
-        .replace(/<\/td>/gi, '\t') // td 끝을 탭으로
-        .replace(/<td[^>]*>/gi, '') // td 시작 제거
-        .replace(/<\/th>/gi, '\t') // th 끝을 탭으로
-        .replace(/<th[^>]*>/gi, '') // th 시작 제거
-        .replace(/<[^>]*>/g, '') // 나머지 모든 HTML 태그 제거
-        .replace(/&nbsp;/g, ' ') // 특수문자 변환
+      // 1차 시도: XML 형식의 판례내용 태그 찾기
+      let precedentContent = '';
+      
+      // XML 태그로 감싸진 판례내용 추출
+      const xmlPatterns = [
+        /<판례내용>([\s\S]*?)<\/판례내용>/i,
+        /<PrecContent>([\s\S]*?)<\/PrecContent>/i,
+        /<content>([\s\S]*?)<\/content>/i,
+        /<본문>([\s\S]*?)<\/본문>/i
+      ];
+      
+      for (const pattern of xmlPatterns) {
+        const match = html.match(pattern);
+        if (match && match[1] && match[1].trim().length > 100) {
+          precedentContent = match[1].trim();
+          console.log('XML 태그에서 판례내용 추출 성공, 길이:', precedentContent.length);
+          break;
+        }
+      }
+      
+      // 2차 시도: CDATA 섹션에서 추출
+      if (!precedentContent || precedentContent.length < 100) {
+        const cdataMatch = html.match(/<!\[CDATA\[([\s\S]*?)\]\]>/);
+        if (cdataMatch && cdataMatch[1] && cdataMatch[1].trim().length > 100) {
+          precedentContent = cdataMatch[1].trim();
+          console.log('CDATA에서 판례내용 추출 성공, 길이:', precedentContent.length);
+        }
+      }
+      
+      // 3차 시도: 테이블 구조에서 판례내용 찾기
+      if (!precedentContent || precedentContent.length < 100) {
+        const tablePattern = /<td[^>]*>[^<]*판례내용[^<]*<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>/i;
+        const tableMatch = html.match(tablePattern);
+        if (tableMatch && tableMatch[1] && tableMatch[1].trim().length > 100) {
+          precedentContent = tableMatch[1].trim();
+          console.log('테이블에서 판례내용 추출 성공, 길이:', precedentContent.length);
+        }
+      }
+      
+      // 4차 시도: 전체 HTML에서 의미있는 텍스트 블록 추출
+      if (!precedentContent || precedentContent.length < 100) {
+        console.log('XML/CDATA/테이블 추출 실패, 전체 HTML 파싱 시도');
+        
+        // 큰 텍스트 블록들을 찾아서 결합
+        const textBlocks = [];
+        
+                 // 여러 줄에 걸친 텍스트 블록 찾기
+         const blockPattern = />([^<\n\r]{50,}(?:\n[^<\n\r]{20,})*)</g;
+         let match: RegExpExecArray | null;
+         
+         while ((match = blockPattern.exec(html)) !== null) {
+           const text = match[1].trim();
+           if (text.length > 50 && /원고|피고|주문|이유|사건|당사자/.test(text)) {
+             textBlocks.push(text);
+           }
+         }
+        
+        if (textBlocks.length > 0) {
+          precedentContent = textBlocks.join('\n\n');
+          console.log('텍스트 블록에서 판례내용 추출, 블록 수:', textBlocks.length, '총 길이:', precedentContent.length);
+        }
+      }
+      
+      // 5차 시도: 모든 태그 제거 후 전체 텍스트 추출
+      if (!precedentContent || precedentContent.length < 100) {
+        console.log('이전 시도 모두 실패, 전체 HTML에서 텍스트 추출');
+        
+        precedentContent = html
+          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // 스크립트 제거
+          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '') // 스타일 제거
+          .replace(/<br[^>]*>/gi, '\n') // br 태그를 줄바꿈으로
+          .replace(/<\/p>/gi, '\n\n') // p 태그 끝을 두 줄바꿈으로
+          .replace(/<p[^>]*>/gi, '\n') // p 태그 시작을 줄바꿈으로
+          .replace(/<\/div>/gi, '\n') // div 끝을 줄바꿈으로
+          .replace(/<div[^>]*>/gi, '\n') // div 시작을 줄바꿈으로
+          .replace(/<\/tr>/gi, '\n') // tr 끝을 줄바꿈으로
+          .replace(/<tr[^>]*>/gi, '') // tr 시작 제거
+          .replace(/<\/td>/gi, '\t') // td 끝을 탭으로
+          .replace(/<td[^>]*>/gi, '') // td 시작 제거
+          .replace(/<\/th>/gi, '\t') // th 끝을 탭으로
+          .replace(/<th[^>]*>/gi, '') // th 시작 제거
+          .replace(/<[^>]*>/g, '') // 나머지 모든 HTML 태그 제거
+          .trim();
+      }
+      
+      // HTML 엔티티 디코딩
+      precedentContent = precedentContent
+        .replace(/&nbsp;/g, ' ')
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&amp;/g, '&')
         .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'")
+        .replace(/&#x([0-9A-Fa-f]+);/g, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+        .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(parseInt(dec, 10)));
+      
+      // 텍스트 정리
+      precedentContent = precedentContent
         .replace(/\t+/g, '\t') // 연속된 탭을 하나로
-        .replace(/[ ]+/g, ' ') // 연속된 공백을 하나로
+        .replace(/[ ]{2,}/g, ' ') // 연속된 공백을 하나로
         .replace(/\n[ \t]*\n/g, '\n\n') // 빈 줄 정리
         .replace(/\n{3,}/g, '\n\n') // 3개 이상의 줄바꿈을 2개로
-        .trim();
-
-      console.log('전체 텍스트 추출 완료, 길이:', fullText.length);
-      console.log('추출된 텍스트 일부:', fullText.substring(0, 500));
-      
-      // 텍스트가 너무 짧으면 (500자 미만) 다른 방법 시도
-      if (fullText.length < 500) {
-        console.log('텍스트가 너무 짧음, 대안 방법 시도');
-        
-        // XML이나 특수 구조일 가능성을 고려
-        const xmlMatch = html.match(/<!\[CDATA\[([\s\S]*?)\]\]>/);
-        if (xmlMatch && xmlMatch[1]) {
-          fullText = xmlMatch[1].trim();
-          console.log('CDATA에서 추출된 텍스트 길이:', fullText.length);
-        }
-        
-        // 여전히 짧으면 모든 텍스트 노드를 찾아서 결합
-        if (fullText.length < 500) {
-          const textNodes = [];
-          const textPattern = />([^<\n\r]{20,})</g;
-          let match;
-          
-          while ((match = textPattern.exec(html)) !== null) {
-            const text = match[1].trim();
-            if (text.length > 20 && !text.match(/^[\s\t]*$/)) {
-              textNodes.push(text);
-            }
-          }
-          
-          if (textNodes.length > 0) {
-            fullText = textNodes.join('\n\n');
-            console.log('텍스트 노드 조합으로 추출된 길이:', fullText.length);
-          }
-        }
-      }
-      
-      // 결과가 여전히 비어있거나 너무 짧으면 원본 HTML 일부를 반환
-      if (!fullText || fullText.length < 100) {
-        console.log('모든 추출 방법 실패, 원본 HTML 반환');
-        fullText = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-      }
-      
-      // 판례 관련 키워드가 포함되어 있는지 확인
-      const hasLegalKeywords = /원고|피고|주문|이유|판결|사건|법원|선고|항소|상고|재심|변론|청구|당사자|민사|형사/.test(fullText);
-      console.log('법률 키워드 포함 여부:', hasLegalKeywords);
-      
-      // 최종 텍스트 정리
-      const finalText = fullText
-        .replace(/\n\s*\n\s*\n/g, '\n\n') // 3개 이상 줄바꿈을 2개로
         .replace(/^[\s\n]+|[\s\n]+$/g, '') // 앞뒤 공백 제거
         .trim();
       
-      console.log('최종 추출된 판례내용 길이:', finalText.length);
-      console.log('최종 텍스트 시작 부분:', finalText.substring(0, 200));
+      // 판례 관련 키워드가 포함되어 있는지 확인
+      const legalKeywords = ['원고', '피고', '주문', '이유', '판결', '법원', '선고', '변론', '청구'];
+      const foundKeywords = legalKeywords.filter(keyword => precedentContent.includes(keyword));
+      console.log('발견된 법률 키워드:', foundKeywords);
       
-      return finalText;
+      // '원고'만 있고 다른 키워드가 없다면 추가 시도
+      if (foundKeywords.length === 1 && foundKeywords[0] === '원고') {
+        console.log('원고만 발견됨, 추가 추출 시도');
+        
+        // 원본 HTML에서 더 큰 범위의 텍스트 찾기
+        const largeTextPattern = /(원고[\s\S]{100,})/i;
+        const largeMatch = html.match(largeTextPattern);
+        if (largeMatch && largeMatch[1]) {
+          const largeText = largeMatch[1]
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          
+          if (largeText.length > precedentContent.length) {
+            precedentContent = largeText;
+            console.log('더 큰 텍스트 범위 추출 성공, 길이:', precedentContent.length);
+          }
+        }
+      }
+      
+      console.log('최종 추출된 판례내용 길이:', precedentContent.length);
+      console.log('최종 텍스트 시작 500자:', precedentContent.substring(0, 500));
+      console.log('최종 텍스트 끝 500자:', precedentContent.substring(Math.max(0, precedentContent.length - 500)));
+      
+      return precedentContent || '판례 내용을 추출할 수 없습니다.';
     };
 
-    const data = {
+    const data: any = {
       판례정보일련번호: precedentId,
       사건명: extractField('사건명') || precedentName || '',
       사건번호: extractField('사건번호') || '',
