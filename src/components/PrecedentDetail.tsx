@@ -99,54 +99,93 @@ const PrecedentDetail: React.FC<PrecedentDetailProps> = ({
         console.log('하드코딩된 매핑 사용:', precedentId, '->', actualPrecedentId);
       }
       
-      // Step 2: 숫자 ID가 확보되면 직접 법제처 사이트 링크 제공
+      // Step 2: 숫자 ID가 확보되면 실제 Edge Function 호출
       if (/^\d+$/.test(actualPrecedentId)) {
-        console.log('판례일련번호로 법제처 링크 생성:', actualPrecedentId);
+        console.log('판례일련번호로 Edge Function 호출:', actualPrecedentId);
         
-        // 성공적인 응답 데이터 구성
-        const successData = {
-          success: true,
-          data: {
-            판례정보일련번호: actualPrecedentId,
-            사건명: precedentName || `사건번호: ${precedentId}`,
-            사건번호: precedentId,
-            선고일자: '',
-            법원명: '',
-            판결유형: '',
-            판시사항: '판례 상세 내용은 법제처 국가법령정보센터에서 확인하실 수 있습니다.',
-            판결요지: '아래 "법제처에서 보기" 버튼을 클릭하여 전체 판례 내용을 확인해보세요.',
-            참조조문: '',
-            참조판례: '',
-            판례내용: `
-              ⚖️ 판례 정보
-              
-              • 판례일련번호: ${actualPrecedentId}
-              • 사건번호: ${precedentId}
-              • 사건명: ${precedentName || ''}
-              
-              📋 안내사항
-              
-              법제처 API의 기술적 제약으로 인해 판례 전문을 직접 표시할 수 없습니다.
-              아래 "법제처에서 보기" 버튼을 클릭하시면 법제처 국가법령정보센터에서 
-              해당 판례의 전체 내용을 확인하실 수 있습니다.
-              
-              🔗 직접 링크
-              http://www.law.go.kr/precSc.do?precSeq=${actualPrecedentId}
-            `,
-            원본HTML: ''
-          },
-          meta: {
-            precedentId: actualPrecedentId,
-            originalId: precedentId,
-            precedentName,
-            timestamp: new Date().toISOString(),
-            source: 'law.go.kr',
-            directLink: `http://www.law.go.kr/precSc.do?precSeq=${actualPrecedentId}`
+        try {
+          // Supabase Edge Function 호출
+          const detailParams = new URLSearchParams({
+            id: actualPrecedentId,
+            type: 'HTML'
+          });
+          
+          if (precedentName) {
+            detailParams.append('lm', precedentName);
           }
-        };
-        
-        setData(successData);
-        return;
+
+          const response = await fetch(`https://wouwaifqgzlwnkvpnndg.supabase.co/functions/v1/precedent-detail?${detailParams.toString()}`, {
+            method: 'GET',
+            headers: {
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ',
+              'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ',
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`API 호출 실패: ${response.status}`);
+          }
+
+          const responseData = await response.json();
+          console.log('Edge Function 응답:', responseData);
+          
+          if (responseData.success && responseData.data) {
+            setData(responseData);
+            return;
+          } else {
+            throw new Error(responseData.error || '판례 데이터를 가져올 수 없습니다');
+          }
+        } catch (edgeFunctionError) {
+          console.error('Edge Function 호출 실패:', edgeFunctionError);
+          
+          // Edge Function 실패 시 기본 안내 메시지 표시
+          const fallbackData = {
+            success: true,
+            data: {
+              판례정보일련번호: actualPrecedentId,
+              사건명: precedentName || `사건번호: ${precedentId}`,
+              사건번호: precedentId,
+              선고일자: '',
+              법원명: '',
+              판결유형: '',
+              판시사항: '판례 상세 내용은 법제처 국가법령정보센터에서 확인하실 수 있습니다.',
+              판결요지: '아래 "법제처에서 보기" 버튼을 클릭하여 전체 판례 내용을 확인해보세요.',
+              참조조문: '',
+              참조판례: '',
+              판례내용: `
+                ⚖️ 판례 정보
+                
+                • 판례일련번호: ${actualPrecedentId}
+                • 사건번호: ${precedentId}
+                • 사건명: ${precedentName || ''}
+                
+                📋 안내사항
+                
+                판례 상세 내용 로드 중 오류가 발생했습니다.
+                아래 "법제처에서 보기" 버튼을 클릭하시면 법제처 국가법령정보센터에서 
+                해당 판례의 전체 내용을 확인하실 수 있습니다.
+                
+                🔗 직접 링크
+                http://www.law.go.kr/precSc.do?precSeq=${actualPrecedentId}
+                
+                오류 내용: ${edgeFunctionError.message}
+              `,
+              원본HTML: ''
+            },
+            meta: {
+              precedentId: actualPrecedentId,
+              originalId: precedentId,
+              precedentName,
+              timestamp: new Date().toISOString(),
+              source: 'law.go.kr',
+              directLink: `http://www.law.go.kr/precSc.do?precSeq=${actualPrecedentId}`
+            }
+          };
+          
+          setData(fallbackData);
+          return;
+        }
       }
       
       // Step 3: 사건번호를 변환할 수 없는 경우 검색 시도
