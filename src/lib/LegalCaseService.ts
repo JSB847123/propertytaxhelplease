@@ -64,8 +64,8 @@ export interface CaseDetailResponse {
  */
 export class LegalCaseService {
   private readonly OC = 'bahnntf';
-  private readonly baseUrl = '/api/law/lawSearch.do';
-  private readonly detailUrl = '/api/law/lawService.do';
+  private readonly baseUrl = 'https://wouwaifqgzlwnkvpnndg.supabase.co/functions/v1/law-search';
+  private readonly detailUrl = 'https://wouwaifqgzlwnkvpnndg.supabase.co/functions/v1/precedent-detail';
   private readonly proxyUrl = 'https://wouwaifqgzlwnkvpnndg.supabase.co/functions/v1';
 
   /**
@@ -103,10 +103,12 @@ export class LegalCaseService {
         searchParams.append('sort', params.sort);
       }
 
-      // 직접 API 호출
+      // Supabase Edge Function 호출
       const response = await fetch(`${this.baseUrl}?${searchParams.toString()}`, {
         method: 'GET',
         headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ',
+          'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ',
           'Content-Type': 'application/json',
         },
       });
@@ -119,9 +121,14 @@ export class LegalCaseService {
       console.log('API 응답:', responseText);
       
       // JSON 파싱
-      const data = JSON.parse(responseText);
+      const jsonData = JSON.parse(responseText);
       
-      // 응답 구조 확인
+      // Edge Function 응답 구조 확인
+      if (!jsonData.success) {
+        throw new Error(jsonData.error || '올바르지 않은 API 응답 형식입니다');
+      }
+
+      const data = jsonData.data;
       const precSearch = data.PrecSearch;
       if (!precSearch) {
         throw new Error('올바르지 않은 API 응답 형식입니다');
@@ -185,17 +192,17 @@ export class LegalCaseService {
         throw new Error('판례 ID를 입력해주세요');
       }
 
-      // 직접 API 호출
+      // Supabase Edge Function 호출
       const detailParams = new URLSearchParams({
-        target: 'prec',
-        ID: caseId,
-        OC: this.OC,
+        id: caseId,
         type: 'JSON'
       });
 
       const response = await fetch(`${this.detailUrl}?${detailParams.toString()}`, {
         method: 'GET',
         headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ',
+          'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdXdhaWZxZ3psd25rdnBubmRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5MjkwMjcsImV4cCI6MjA2NzUwNTAyN30.Grlranxe25fw4tRElDsf399zCfhHtEbxCO5b1coAVMQ',
           'Content-Type': 'application/json',
         },
       });
@@ -210,25 +217,15 @@ export class LegalCaseService {
       // JSON 파싱
       const jsonData = JSON.parse(responseText);
       
-      // 응답 구조 확인
-      const precService = jsonData.PrecService;
-      if (!precService) {
-        throw new Error('판례 정보를 찾을 수 없습니다');
+      // Edge Function 응답 구조 확인
+      if (!jsonData.success) {
+        throw new Error(jsonData.error || '판례 정보를 찾을 수 없습니다');
       }
 
-      const data = {
-        판례정보일련번호: precService.판례정보일련번호 || '',
-        사건명: precService.사건명 || '',
-        사건번호: precService.사건번호 || '',
-        선고일자: precService.선고일자 || '',
-        법원명: precService.법원명 || '',
-        판결유형: precService.판결유형 || '',
-        판시사항: precService.판시사항 || '',
-        판결요지: precService.판결요지 || '',
-        참조조문: precService.참조조문 || '',
-        참조판례: precService.참조판례 || '',
-        판례내용: precService.판례내용 || ''
-      };
+      const data = jsonData.data;
+      if (!data) {
+        throw new Error('판례 정보를 찾을 수 없습니다');
+      }
 
       return {
         success: true,
