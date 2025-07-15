@@ -250,6 +250,60 @@ function parseHtmlResponse(html: string, precedentId: string, precedentName: str
       return '';
     };
 
+    // 판례내용 특별 처리 함수
+    const extractPrecedentContent = (): string => {
+      // 1. 판례내용 태그로 감싸진 내용 추출
+      const contentPatterns = [
+        /<판례내용[^>]*>([\s\S]*?)<\/판례내용>/i,
+        /<precContent[^>]*>([\s\S]*?)<\/precContent>/i,
+        /<content[^>]*>([\s\S]*?)<\/content>/i
+      ];
+      
+      for (const pattern of contentPatterns) {
+        const match = html.match(pattern);
+        if (match && match[1]) {
+          let content = match[1].trim();
+          // HTML 태그 제거하되 줄바꿈은 유지
+          content = content.replace(/<br[^>]*>/gi, '\n');
+          content = content.replace(/<p[^>]*>/gi, '\n');
+          content = content.replace(/<\/p>/gi, '\n');
+          content = content.replace(/<[^>]*>/g, '');
+          content = content.replace(/&nbsp;/g, ' ');
+          content = content.replace(/&lt;/g, '<');
+          content = content.replace(/&gt;/g, '>');
+          content = content.replace(/&amp;/g, '&');
+          return content.trim();
+        }
+      }
+      
+      // 2. 전체 HTML에서 판례 내용 추출 (fallback)
+      // 일반적으로 판례 내용은 HTML의 가장 큰 텍스트 블록
+      const cleanHtml = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+      const textBlocks = cleanHtml.match(/>([^<]{100,})</g);
+      
+      if (textBlocks && textBlocks.length > 0) {
+        // 가장 긴 텍스트 블록을 판례 내용으로 간주
+        const longestBlock = textBlocks
+          .map(block => block.substring(1, block.length - 1).trim())
+          .filter(block => block.length > 200)
+          .sort((a, b) => b.length - a.length)[0];
+          
+        if (longestBlock) {
+          return longestBlock;
+        }
+      }
+      
+      // 3. 마지막 fallback: 전체 HTML에서 텍스트만 추출
+      let fallbackContent = html.replace(/<[^>]*>/g, ' ');
+      fallbackContent = fallbackContent.replace(/&nbsp;/g, ' ');
+      fallbackContent = fallbackContent.replace(/&lt;/g, '<');
+      fallbackContent = fallbackContent.replace(/&gt;/g, '>');
+      fallbackContent = fallbackContent.replace(/&amp;/g, '&');
+      fallbackContent = fallbackContent.replace(/\s+/g, ' ').trim();
+      
+      return fallbackContent;
+    };
+
     const data = {
       판례정보일련번호: precedentId,
       사건명: extractField('사건명') || precedentName || '',
@@ -261,7 +315,7 @@ function parseHtmlResponse(html: string, precedentId: string, precedentName: str
       판결요지: extractField('판결요지') || '',
       참조조문: extractField('참조조문') || '',
       참조판례: extractField('참조판례') || '',
-      판례내용: extractField('판례내용') || html.substring(0, 2000) + '...', // 전체 내용이 없으면 일부만
+      판례내용: extractPrecedentContent(), // 개선된 판례내용 추출 함수 사용
       원본HTML: html
     };
 
