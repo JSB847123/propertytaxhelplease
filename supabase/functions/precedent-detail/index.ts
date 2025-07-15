@@ -252,6 +252,8 @@ function parseHtmlResponse(html: string, precedentId: string, precedentName: str
 
     // 판례내용 특별 처리 함수
     const extractPrecedentContent = (): string => {
+      console.log('판례내용 추출 시작');
+      
       // 1. 판례내용 태그로 감싸진 내용 추출
       const contentPatterns = [
         /<판례내용[^>]*>([\s\S]*?)<\/판례내용>/i,
@@ -263,44 +265,131 @@ function parseHtmlResponse(html: string, precedentId: string, precedentName: str
         const match = html.match(pattern);
         if (match && match[1]) {
           let content = match[1].trim();
-          // HTML 태그 제거하되 줄바꿈은 유지
+          console.log('태그 방식으로 추출된 내용 길이:', content.length);
+          
+          // HTML 태그 제거하되 줄바꿈과 구조는 유지
           content = content.replace(/<br[^>]*>/gi, '\n');
-          content = content.replace(/<p[^>]*>/gi, '\n');
+          content = content.replace(/<p[^>]*>/gi, '\n\n');
           content = content.replace(/<\/p>/gi, '\n');
+          content = content.replace(/<div[^>]*>/gi, '\n');
+          content = content.replace(/<\/div>/gi, '\n');
+          content = content.replace(/<td[^>]*>/gi, '\t');
+          content = content.replace(/<\/td>/gi, '\t');
+          content = content.replace(/<tr[^>]*>/gi, '\n');
+          content = content.replace(/<\/tr>/gi, '\n');
           content = content.replace(/<[^>]*>/g, '');
           content = content.replace(/&nbsp;/g, ' ');
           content = content.replace(/&lt;/g, '<');
           content = content.replace(/&gt;/g, '>');
           content = content.replace(/&amp;/g, '&');
+          content = content.replace(/\n\s*\n\s*\n/g, '\n\n'); // 3개 이상의 연속 줄바꿈을 2개로
           return content.trim();
         }
       }
       
-      // 2. 전체 HTML에서 판례 내용 추출 (fallback)
-      // 일반적으로 판례 내용은 HTML의 가장 큰 텍스트 블록
-      const cleanHtml = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
-      const textBlocks = cleanHtml.match(/>([^<]{100,})</g);
+      // 2. 법제처 특화 HTML 구조 분석
+      // 법제처 판례는 보통 특정 테이블 구조나 div 구조를 가짐
+      const structurePatterns = [
+        // 테이블 기반 구조
+        /<table[^>]*>[\s\S]*?<\/table>/gi,
+        // div 기반 구조
+        /<div[^>]*class[^>]*content[^>]*>[\s\S]*?<\/div>/gi,
+        // 본문 영역
+        /<body[^>]*>[\s\S]*?<\/body>/gi
+      ];
       
-      if (textBlocks && textBlocks.length > 0) {
-        // 가장 긴 텍스트 블록을 판례 내용으로 간주
-        const longestBlock = textBlocks
-          .map(block => block.substring(1, block.length - 1).trim())
-          .filter(block => block.length > 200)
-          .sort((a, b) => b.length - a.length)[0];
-          
-        if (longestBlock) {
-          return longestBlock;
+      let bestContent = '';
+      let maxLength = 0;
+      
+      for (const pattern of structurePatterns) {
+        const matches = html.match(pattern);
+        if (matches) {
+          for (const match of matches) {
+            // HTML 태그 제거 및 텍스트 추출
+            let textContent = match
+              .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+              .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+              .replace(/<br[^>]*>/gi, '\n')
+              .replace(/<p[^>]*>/gi, '\n\n')
+              .replace(/<\/p>/gi, '\n')
+              .replace(/<div[^>]*>/gi, '\n')
+              .replace(/<\/div>/gi, '\n')
+              .replace(/<td[^>]*>/gi, '\t')
+              .replace(/<\/td>/gi, '\t')
+              .replace(/<tr[^>]*>/gi, '\n')
+              .replace(/<\/tr>/gi, '\n')
+              .replace(/<[^>]*>/g, '')
+              .replace(/&nbsp;/g, ' ')
+              .replace(/&lt;/g, '<')
+              .replace(/&gt;/g, '>')
+              .replace(/&amp;/g, '&')
+              .replace(/\s+/g, ' ')
+              .trim();
+            
+            // 판례 관련 키워드가 포함된 충분히 긴 텍스트를 찾기
+            const hasLegalKeywords = /원고|피고|주문|이유|판결|사건|법원|선고|항소|상고|재심|변론|청구/.test(textContent);
+            
+            if (textContent.length > maxLength && textContent.length > 500 && hasLegalKeywords) {
+              maxLength = textContent.length;
+              bestContent = textContent;
+            }
+          }
         }
       }
       
-      // 3. 마지막 fallback: 전체 HTML에서 텍스트만 추출
-      let fallbackContent = html.replace(/<[^>]*>/g, ' ');
-      fallbackContent = fallbackContent.replace(/&nbsp;/g, ' ');
-      fallbackContent = fallbackContent.replace(/&lt;/g, '<');
-      fallbackContent = fallbackContent.replace(/&gt;/g, '>');
-      fallbackContent = fallbackContent.replace(/&amp;/g, '&');
-      fallbackContent = fallbackContent.replace(/\s+/g, ' ').trim();
+      if (bestContent) {
+        console.log('구조 분석으로 추출된 내용 길이:', bestContent.length);
+        return bestContent;
+      }
       
+      // 3. 전체 HTML에서 판례 관련 텍스트 블록들을 모두 추출
+      const cleanHtml = html
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+        
+      // 긴 텍스트 블록들을 모두 찾기
+      const textBlocks = [];
+      const blockPattern = />([^<]{50,})</g;
+      let match;
+      
+      while ((match = blockPattern.exec(cleanHtml)) !== null) {
+        const block = match[1].trim();
+        if (block.length > 100) {
+          textBlocks.push(block);
+        }
+      }
+      
+      if (textBlocks.length > 0) {
+        // 판례 관련 키워드가 포함된 블록들을 우선으로 선택
+        const legalBlocks = textBlocks.filter(block => 
+          /원고|피고|주문|이유|판결|사건|법원|선고|항소|상고|재심|변론|청구/.test(block)
+        );
+        
+        const selectedBlocks = legalBlocks.length > 0 ? legalBlocks : textBlocks;
+        
+        // 모든 관련 블록을 합쳐서 반환
+        const combinedContent = selectedBlocks
+          .sort((a, b) => b.length - a.length) // 긴 블록 우선
+          .slice(0, 10) // 최대 10개 블록
+          .join('\n\n');
+          
+        console.log('블록 조합으로 추출된 내용 길이:', combinedContent.length);
+        return combinedContent;
+      }
+      
+      // 4. 마지막 fallback: 전체 HTML에서 텍스트만 추출
+      let fallbackContent = html
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/\s+/g, ' ')
+        .trim();
+      
+      console.log('Fallback으로 추출된 내용 길이:', fallbackContent.length);
       return fallbackContent;
     };
 
